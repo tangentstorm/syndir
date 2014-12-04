@@ -1,0 +1,75 @@
+#+title: syndir: a syntax directed editor
+
+* DONE start with basic console io primitives
+:PROPERTIES:
+:TS:       <2014-12-04 07:38AM>
+:ID:       78uknqj0wog0
+:END:
+
+* DONE render a horizontal sequence of items
+:PROPERTIES:
+:TS:       <2014-12-04 07:39AM>
+:ID:       ai9borj0wog0
+:END:
+
+* DONE implement a cursor that traverses the sequence
+:PROPERTIES:
+:TS:       <2014-12-04 07:40AM>
+:ID:       xareqtj0wog0
+:END:
+
+* DONE hook the cursor up to input events for user interaction
+:PROPERTIES:
+:TS:       <2014-12-04 07:41AM>
+:ID:       a083duj0wog0
+:END:
+
+* DONE allow inserting, deleting, swapping items in the sequence
+:PROPERTIES:
+:TS:       <2014-12-04 07:39AM>
+:ID:       4h6k9sj0wog0
+:END:
+
+* TODO generalize the cursor to work on arbitrary sequences.
+:PROPERTIES:
+:TS:       <2014-12-04 10:05AM>
+:ID:       a6sbxiq0wog0
+:END:
+This entails wrapping the primitives as objects.
+
+* TODO expand cursor to allow editing trees
+:PROPERTIES:
+:TS:       <2014-12-04 07:41AM>
+:ID:       63qe8vj0wog0
+:END:
+
+** TODO start by only allowing appends since that seems easiest.
+:PROPERTIES:
+:TS:       <2014-12-04 07:45AM>
+:ID:       gyxj72k0wog0
+:END:
+
+* TODO unparse a tree
+:PROPERTIES:
+:TS:       <2014-11-20 11:56AM>
+:ID:       912c9k80eog0
+:END:
+
+* TODO write tests for tree builder behavior
+:PROPERTIES:
+:TS:       <2014-11-21 11:53PM>
+:ID:       4ps1ra70gog0
+:END:
+
+* TODO build a sequential machine / regex thing for j
+:PROPERTIES:
+:TS:       <2014-11-22 12:00AM>
+:ID:       cxvdgl70gog0
+:END:
+
+
+* TODO investigate JOD and see if it helps with the tech tree idea
+:PROPERTIES:
+:TS:       <2014-12-04 10:07AM>
+:ID:       s7e51mq0wog0
+:END:
