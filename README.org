@@ -1,0 +1,19 @@
+* syndir: a syntax directed editor
+
+See [[https://docs.google.com/document/d/115Y4hPnzrS8OxhXIqGbnEXVVPx_42G1p5b-fkIfFStE/edit?usp=sharing][this google doc]] for an overview of the project.
+
+
+* files (indented items are used by the modules above)
+
+- startup.ijs     :: common definitions
+- graphdb.ijs     :: simple graph database / triple store
+  - mvars.ijs     :: helper for memory mapped variables (uses jmf)
+  - stringdb.ijs  :: persistent key-value store (uses jfiles)
+- boxed.ijs       :: boxed token editor widget
+  - cursor.ijs    :: cursor object
+    - list.ijs    :: list data type
+  - cwio.ijs      :: console io (requires pascal junk. needs to go away)
+- unify.ijs       :: unification algorithm
+  - boxer.ijs     :: nested stacks / s-expressions
+    - cheq.ijs    :: testing tool
+  - dict.ijs      :: in-memory key-value dictionaries
