@@ -1,0 +1,49 @@
+NB. This is a specification for how the syntax directed
+NB. editor should behave.
+
+NB. The text is delimited by ⸢...⸣
+NB. The current selection is delimited by ⸤...⸥
+NB. The ¤ symbol reperesents the insertion point.
+NB.
+NB. The following fake j primitives represent nonterminals:
+NB.
+NB.   J: = j sentence
+NB.   N: = noun
+NB.   A: = adverb
+NB.   C: = conjunction
+NB.   V: = verb
+NB.   S: = assignment
+NB.
+NB. For this spec, the verb 't' (for 'text') tests that the current
+NB. state of the text matches the following explicit noun.
+NB. The verb 'm' (for 'menu') does the same for the available
+NB. menu options.
+
+NB. The initial text is always the node ⸢J:⸣.
+t''
+⸢⸤¤J:⸥⸣
+)
+m''
+→ move cursor to the right
+n J: ⇒ J: N: J:
+v J: ⇒ J: V: J:
+g J: ⇒ J: I: =: J:
+l J: ⇒ J: I: =. J:
+)
+
+NB. The cursor can be moved forward.
+A'→'
+⸢⸤J:¤⸥⸣
+)
+
+NB. Applying rule 'n' introduces a noun.
+A'n'
+⸢⸤N:⸥¤⸣
+)
+
+0 1 2 3
+N: A: C: V: (: I: L: G: R:
+‹«⇐
+⊥
+a::. n::. v::. c::. A::. N::. V::. C::.
+
