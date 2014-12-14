@@ -1,5 +1,5 @@
 NB. a simple memory-mapped graph database
-cc'base' [ load each 'mvars.ijs';'stringdb.ijs'
+cc'base' [ import 'mvars stringdb'
 
 stringdb mdir,'/nodes.jf'
 

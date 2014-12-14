@@ -5,7 +5,15 @@ cocurrent'z'
 
 cc =: cocurrent :: coname f.
 module =: cocurrent
-import =: coinsert [ require
+
+NB. TODO: fix this so it can use any directory on the path...
+import =: 3 : 0
+  for_name. ;: y do.
+    if. fexist modpath=.'~Syn/',(>name),'.ijs' do. require modpath
+    else. require name end.
+    coinsert name
+  end.
+)
 
 immex =: [:(9!:29)1: [9!:27 NB. schedule y:str for immediate execution
 

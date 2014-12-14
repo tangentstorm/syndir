@@ -1,6 +1,6 @@
 NB. boxer: class and s-expression parser to create nested objects
 
-load 'cheq.ijs' NB. for unit tests at the end
+import 'cheq' NB. for unit tests at the end
 
 NB. stacks of like objects
 NB. ----------------------------------------------------------

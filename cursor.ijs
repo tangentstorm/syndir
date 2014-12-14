@@ -1,4 +1,4 @@
-import 'list.ijs'
+import 'list'
 
 NB. a basic cursor class, with support for text terminal display
 coclass'Cursor'
