@@ -24,7 +24,7 @@ chr  =: ord^:_1
 ctrl =: (_64 + ])&.ord  NB. ASCII control characters
 
 setg=: dyad define
-  ":x,'=:',(5!:6)<'y'  NB. set global using parenthesized repr
+  ".x,'=:',(5!:6)<'y'  NB. set global using parenthesized repr
 )
 
 
