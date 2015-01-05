@@ -27,6 +27,9 @@ setg=: dyad define
   ".x,'=:',(5!:6)<'y'  NB. set global using parenthesized repr
 )
 
+nval =: ".@(#~ ' _0123456789' e.~ ])
+OK   =: 0 0 $0
+ok   =: OK"_
 
 NB. x? m A y : accessor for array m
 NB. ------------------------------------------------------------
@@ -54,6 +57,14 @@ NB. ------------------------------------------------------------
 NB. ex: (enum'a b c' ⇔ 'a b c'=:i.3)
 enum =: [: ". [: ;"1 [: (,. '=:'B ,. ((<@":)"0)@i.@#) ;:
 
+
+NB. m args : creates a gerund containing m verbs
+NB. verb i fetches item i from the y argument
+NB. ------------------------------------------------------------
+args =: adverb define
+  r=.>a: for_i. i.m do. r=.r`([:>i{]) end.
+)
+'`a b c d' =: 4 args
 
 NB. hooks for transient or os-specific config changes.
 NB. ------------------------------------------------------------
