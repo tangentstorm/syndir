@@ -1,5 +1,6 @@
 coclass 'BoxEd'
-require each ' ' splitstring 'cwio.ijs list.ijs cursor.ijs'
+require 'cwio.ijs'
+import each 'list';'cursor'
 coinsert 'Cursor kbd'
 doc =: 'A simple editor for boxed arrays'
 
@@ -28,7 +29,7 @@ run =: verb define
   done =. 0
   while. -. done do.
     show''
-    select. ch =. a.{~".rk''
+    select. ch =. rk''
       case. L_ARROW;'<';'b';ctrl'B' do. nudge _1
       case. R_ARROW;'>';'f';ctrl'F' do. nudge  1
       case. 'i' do. ins prompt'|winsert:'
