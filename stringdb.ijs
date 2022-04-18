@@ -7,8 +7,8 @@ NB.
 NB. Only one database is used at a time. To select the
 NB. database, run:  stringdb'data/strings'
 NB.
-module 'stringdb'
-import 'jfiles'
+cocurrent 'stringdb'
+require 'jfiles'
 
 stringdb =: verb define
   assert #y

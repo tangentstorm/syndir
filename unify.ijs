@@ -3,8 +3,8 @@ NB.
 NB. © copyright 2014 michal j wallace < http://tangentstorm.com/ >
 NB. available for use under the MIT/X11 license.
 NB.
-import 'boxer' NB. for sx
-import 'dict'  NB. for sym/S, dict,get,put,etc
+require 'boxer.ijs dict.ijs' NB. for sx
+coinsert each 'boxer';'dict'  NB. for sym/S, dict,get,put,etc
 
 
 NB. symbolic substitution    (x:dict subs y:sx → sx)

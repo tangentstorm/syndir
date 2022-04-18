@@ -1,9 +1,15 @@
 NB. a simple memory-mapped graph database
-cc'base' [ import 'mvars stringdb'
+require 'mvars.ijs stringdb.ijs'
+cocurrent'base' [ coinsert 'mvars stringdb'
 
 stringdb mdir,'/nodes.jf'
 
-enum'rType rChild'
+'rType rChild' =: i.2
+
+NB. G and P (get/put) get and put global variables
+setg=: {{ ".x,'=:',(5!:6)<'y' }}  NB. set global using parenthesized repr
+G=: {{ m~[y }}
+P=: {{ m setg y }}
 
 3 : 0''
   NB. only declare these mapped variables if they're undefined.

@@ -1,6 +1,6 @@
 NB. boxer: class and s-expression parser to create nested objects
 
-import 'cheq' NB. for unit tests at the end
+require 'cheq.ijs' NB. for unit tests at the end
 
 NB. stacks of like objects
 NB. ----------------------------------------------------------
@@ -118,7 +118,7 @@ nxtok=: verb define
     NB. anything else is a number or a symbol
     elseif. do.
       while. (ch e. others) *. (cp<ep) do. nxch tok=.tok,ch end.
-      if. *./tok e. digits do. tok=.".tok else. tok=.s:<tok end.
+      if. *./tok e. digits do. tok=.0".tok else. tok=.s:<tok end.
     end.
   else. ok end.
   <tok return. NB. the boxed token.
