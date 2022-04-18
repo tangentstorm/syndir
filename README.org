@@ -15,8 +15,9 @@ The rest are not yet connected:
   - mvars.ijs     :: helper for memory mapped variables (uses jmf)
   - stringdb.ijs  :: persistent key-value store (uses jfiles)
 
-- proofed.ijs     :: tree-centric syntax directed editor
-- unify.ijs       :: unification algorithm
-  - boxer.ijs     :: nested stacks / s-expressions
-    - cheq.ijs    :: testing tool
-  - dict.ijs      :: in-memory key-value dictionaries
+- proofed.ijs       :: tree-centric syntax directed editor
+  - stype.ijs       :: (redundant) wrapper for j's type inspection primitive
+  - unify.ijs       :: unification algorithm
+    - boxer.ijs     :: nested stacks / s-expressions
+      - cheq.ijs    :: testing tool
+    - dict.ijs      :: in-memory key-value dictionaries
