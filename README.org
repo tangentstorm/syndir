@@ -4,7 +4,7 @@ See [[https://docs.google.com/document/d/115Y4hPnzrS8OxhXIqGbnEXVVPx_42G1p5b-fkI
 
 * files (indented items are used by the modules above)
 
-- syndir.ijs      :: main application
+- syndir.ijs      :: (eventually) the main application
   - boxed.ijs     :: boxed token editor widget
     - list.ijs    :: list data type
     - cursor.ijs  :: cursor object
@@ -15,6 +15,7 @@ The rest are not yet connected:
   - mvars.ijs     :: helper for memory mapped variables (uses jmf)
   - stringdb.ijs  :: persistent key-value store (uses jfiles)
 
+- proofed.ijs     :: tree-centric syntax directed editor
 - unify.ijs       :: unification algorithm
   - boxer.ijs     :: nested stacks / s-expressions
     - cheq.ijs    :: testing tool
