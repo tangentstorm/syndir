@@ -1,5 +1,5 @@
 require 'tangentstorm/j-kvm'
-require 'boxer.ijs dict.ijs unify.ijs stype.ijs'
+require 'sx.ijs dict.ijs unify.ijs stype.ijs'
 coinsert 'vt'
 
 NB. G holds the grammar

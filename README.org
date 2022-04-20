@@ -18,6 +18,10 @@ The rest are not yet connected:
 - proofed.ijs       :: tree-centric syntax directed editor
   - stype.ijs       :: (redundant) wrapper for j's type inspection primitive
   - unify.ijs       :: unification algorithm
-    - boxer.ijs     :: nested stacks / s-expressions
+    - sx.ijs        :: s-expressions
+      - boxer.ijs   :: nested object builder
       - cheq.ijs    :: testing tool
     - dict.ijs      :: in-memory key-value dictionaries
+
+- unparse.ijs     :: unparser/pretty-printer
+- parseco.ijs     :: parser combinators
