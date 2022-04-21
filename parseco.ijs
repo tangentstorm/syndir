@@ -59,10 +59,6 @@ AT =: {{ m&{:: : (<@[ m} ]) }}
 
 NB. -- "microcode" ---------------------------------------------
 
-NB. simple test framework
-T =: [:`]@.mb NB. T = assert match
-F =: ]`[:@.mb NB. F = assert doesn't match
-
 NB. u AA v. s->s. apply u at v in y. (where v = (m AT))
 AA =: {{ (u v y) v y }}
 
@@ -99,22 +95,14 @@ nil =: I
 NB. any: s->s. matches one input item, unless out of bounds.
 any =: {{ f mb nx^:f y [ f =. (#ib y)>ix y }}
 
-any on 'hello'
-
 NB. u neg: s->s. invert match flag from u and restore everything else
 NB. from the original state after running u. This primitive allows
 NB. you to implement negative lookahead (or apply it twice to implement
 NB. positive lookahead without consuming).
 neg =: {{'neg'] y mb~ -. mb u y }}
 
-any neg on 'hello'
-
-
 NB. u end: s->s. matches at end of input.
 end =: any neg
-
-end on 'x'
-end on ''
 
 NB. r try : s->s. generic error trap. mostly this handles
 NB. the case where we're reading past the end of the input.
@@ -123,24 +111,14 @@ try =: :: O
 NB. m chr: s->s. match literal atom m and advance the index
 chr =: {{ y fw m  -: ch y }} try
 
-'a' chr on 'xyz'
-'a' chr on 'abc'
-
 NB. m chs s->s. match any one item from m and advance ix. ('choose'/'character set')
 chs =: {{ y fw m e.~ ch y }} try
-
-'abc' chs on 'xyz'
-'abc' chs on 'cab'
-
 
 NB. m seq: s->s. match each rule in sequence m
 seq =: {{'seq'] s=:y
   for_r. m do.
     if. -.mb s=. r`:6 s do. O y return. end.
   end. I s }}
-
-T ('a'chr)`('b'chr)`('c'chr) seq on 'abc'
-
 
 NB. m alt: s->s. try each rule in m until one matches.
 NB. This is "Prioritized Choice" from PEG parsers.
@@ -154,9 +132,6 @@ alt =: {{'alt'] s=:y
     if. mb  s=. r`:6 s do. I s return. end.
   end. O y }}
 
-F ('a'chr)`('b'chr)`('c'chr) alt on 'xyz'
-T ('a'chr)`('b'chr)`('c'chr) alt on 'abc'
-
 NB. u opt: s->s. optionally match rule u. succeed either way
 opt =: I@:
 
@@ -164,9 +139,6 @@ NB. m lit: s->s like seq for literals only.
 NB. this just matches the whole sequence directly vs S.
 NB. ,m is so we can match a single character.
 lit =: {{ y fw (#m) * m-: (#m=.,m) la y }} try
-
-T 'ab' lit on 'abc'
-
 
 NB. -- lexers --------------------------------------------------
 
@@ -183,34 +155,15 @@ ifu =: {{ f mb y v^:f s [ f=.mb s=.u y }}
 NB. u tok: s->s move current token to NB if u matches, else fail
 tok =: ifu({{ '' cb (cb y) (AP nb) y }}@])
 
-T 'ab' lit tok on 'abc'
-
-
 NB. m sym: s->s alias for 'm lit tok'
 sym =: lit tok
-
-T 'ab' sym on 'abc'
 
 NB. u zap: s->s match if u matches, but drop any generated nodes
 NB. the only effect that persists is the current char and index.
 zap =: ifu(ch@] ch ix@] ix [)
 
-T '3' lit opt on '1'
-T '3' lit opt on '3'
-T 'a'lit`('b'lit opt)`('c'lit) seq on 'abc'
-T 'a'lit`('b'lit opt)`('c'lit) seq on 'acb'
-
 NB. u rep: s->s. match 1+ repetitions of u
 rep =: {{ y (<&ix mb ]) u^:mb^:_ I y }}
-
-
-NB. while =: {{ u ^: v ^:_ y }}
-NB. rep =: {{ y (<&ix mb ]) u while mb I y }}
-
-T ('a'lit rep) on 'aab'
-F ('a'lit rep) on 'bba'
-T ('a'lit rep)`('b'lit) seq on 'aaab'
-
 
 NB. u orp: s->s. optionally repeat (match 0+ repetitions of u)}}
 orp =: rep opt
@@ -218,9 +171,6 @@ orp =: rep opt
 NB. u not: s->s. match anything but u.
 NB. fail if u matches or end of input, otherwise consume 1 input.
 not =: {{ (u neg)`any seq }}
-
-T 'x' lit not on 'a'
-
 
 NB. u sep v: s->s. match 1 or more u, separated by v
 sep =: {{ u`(v`u seq orp) seq f. }}
@@ -303,9 +253,8 @@ WSz =: WS orp zap
 NB. generic line splitter
 lines =: {{ ,.> NB at s =. (NL not rep) tok sep (NL zap) on y }}
 
-
-NB. j syntax rules
-NB. -------------------------------
+
+NB. -- j lexer -------------------------------------------------
 
 NB. fragments used by the tokens:
 j_op  =: (brack,curly,other-.'_') chs
@@ -333,6 +282,79 @@ STR_ESC =: ('\'lit)`any seq
 DQ =: '"'lit
 STR =: DQ`(STR_ESC`(DQ not) alt orp)`DQ seq tok
 
+
+NB. -- parser examples -----------------------------------------
+
+NB. simple pascal -like block
+BEGIN  =: 'begin' sym
+END =: 'end' sym
+nends =: END not orp tok
+block =: (BEGIN`nends`END) seq
+block on 'begin hello; 2+2; end'
+
+TRACE =: 0
+NB. m trace v: s->st. provides a trace of parse rule v if TRACE~:0
+trace =: {{
+  if. TRACE do. r [ smoutput m; r=.v Y=:y [ smoutput '>> ',m
+  else. v y end. }}
+
+NB. s-expressions (lisp-like syntax)
+LP =: 'LP' trace (LPAREN zap)
+RP =: 'RP' trace (RPAREN zap)
+ID =: 'ID' trace (LP`RP`WS`DQ alt not rep tok)
+
+NB. se: s-expression parser
+se =: 'se' trace (WSz`LP`(se`ID`STR`WSz alt orp)`RP seq elm '' sep WSz)
+
+NB. ll: lisp lexer
+ll =: WSz`((LPAREN tok)`(RPAREN tok)`WS`ID`(STR tok) alt)seq orp
+
+
+NB. -- tree matching -------------------------------------------
+
+NB. u all: s->s. matches if u matches the entire remaining input.
+all =: {{ (u f.)`end seq }}
+
+NB. u box: s->s. matches if current value is
+box =: {{
+  if. 32 = 3!:0 c =. ch y
+  do. smoutput 'entering box C:' [ C =: > c
+      smoutput c
+      f mb nx^:f s [f=.mb s=.u all on > c else. O y end. }}
+
+
+NB. -- test suite ----------------------------------------------
+
+T =: [:`]@.mb NB. T = assert match
+F =: ]`[:@.mb NB. F = assert doesn't match
+
+T any on 'hello'
+F any neg on 'hello'
+T any neg on ''
+T end on ''
+F end on 'x'
+F 'a' chr on 'xyz'
+T 'a' chr on 'abc'
+T 'abc' chs on 'cab'
+F 'abc' chs on 'xyz'
+T ('a'chr)`('b'chr)`('c'chr) seq on 'abc'
+F ('a'chr)`('b'chr)`('c'chr) alt on 'xyz'
+T ('a'chr)`('b'chr)`('c'chr) alt on 'abc'
+T 'ab' lit on 'abc'
+
+T 'ab' lit tok on 'abc'
+
+T 'ab' sym on 'abc'
+T '3' lit opt on '1'
+T '3' lit opt on '3'
+T 'a'lit`('b'lit opt)`('c'lit) seq on 'abc'
+T 'a'lit`('b'lit opt)`('c'lit) seq on 'acb'
+
+T ('a'lit rep) on 'aab'
+F ('a'lit rep) on 'bba'
+T ('a'lit rep)`('b'lit) seq on 'aaab'
+
+T 'x' lit not on 'a'
 
 jsrc =: 0 : 0
 avg =: +/ % #  NB. average is sum div len
@@ -343,6 +365,10 @@ name =. 'Sally O''Malley'
 [ expect =: (;:jsrc)
 [ actual =: J_LEXER parse jsrc
 assert expect -: actual
+
+
+NB. -- more examples -------------------------------------------
+NB. !! probably should move this elsewhere.
 
 examples =: {{
   nx^:(<#S) hw0 =: on S=.'hello (world 123)'
@@ -374,30 +400,6 @@ nil`any`end `:0@ on each '';'x'
 done 'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node hw0
 
 
-NB. simple pascal -like block
-BEGIN  =: 'begin' sym
-END =: 'end' sym
-nends =: END not orp tok
-block =: (BEGIN`nends`END) seq
-block on 'begin hello; 2+2; end'
-
-TRACE =: 0
-NB. m trace v: s->st. provides a trace of parse rule v if TRACE~:0
-trace =: {{
-  if. TRACE do. r [ smoutput m; r=.v Y=:y [ smoutput '>> ',m
-  else. v y end. }}
-
-
-NB. s-expressions (lisp-like syntax)
-LP =: 'LP' trace (LPAREN zap)
-RP =: 'RP' trace (RPAREN zap)
-ID =: 'ID' trace (LP`RP`WS`DQ alt not rep tok)
-
-NB. se: s-expression parser
-se =: 'se' trace (WSz`LP`(se`ID`STR`WSz alt orp)`RP seq elm '' sep WSz)
-
-NB. ll: lisp lexer
-ll =: WSz`((LPAREN tok)`(RPAREN tok)`WS`ID`(STR tok) alt)seq orp
 
 lisp =: '(one two (a b c) three) (banana)'
 ll parse lisp
@@ -405,19 +407,8 @@ se parse lisp
 assert 2 = $ se parse lisp
 
 
-NB. tree matching
-
-NB. u all: s->s. matches if u matches the entire remaining input.
-all =: {{ (u f.)`end seq }}
-
-NB. u box: s->s. matches if current value is
-box =: {{
-  if. 32 = 3!:0 c =. ch y
-  do. smoutput 'entering box C:' [ C =: > c
-      smoutput c
-      f mb nx^:f s [f=.mb s=.u all on > c else. O y end. }}
-
-NB. decompiler
+
+NB. -- decompiler ----------------------------------------------
 cocurrent 'decompile'
 ar =: 5!:1@<
 br =: 5!:2@<
