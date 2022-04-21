@@ -33,13 +33,13 @@ NB. s0 : s. initial parse state
 s0 =: _ ; 0 ; '' ; 6#a:
 
 NB. these names are the indices into the tuple:
-'MB IX CH TB NT NA NB WK IB' =: i.#s0
+'MB IX CH CB NT NA NB WK IB' =: i.#s0
 
-NB. type s = (ix;ch;tb;nb;nt;na;wb)
+NB. type s = (ix;ch;cb;nb;nt;na;wb)
 NB.   mb = match bit
 NB.   ix = current index into the input
 NB.   ch = current character, or '' after ix>#S
-NB.   tb = token buffer (grows as we match each char)
+NB.   cb = char buffer (grows as we match characters)
 NB.   nt = node tag
 NB.   na = node attributes
 NB.   nb = node buffer (grows as we build rules)
@@ -47,8 +47,8 @@ NB.   wk = work stack (grows with recursive descent)
 NB.   ib = input buffer
 
 NB. accessor verbs: (v y) gets item from state,  (x v y) sets it.
-AT =: {{ m&(>@{) : (<@[ m} ]) }}
-(ix=:IX AT) (ch=:CH AT) (ib=:IB AT) (tb=:TB AT)
+AT =: {{ m&{:: : (<@[ m} ]) }}
+(ix=:IX AT) (ch=:CH AT) (ib=:IB AT) (cb=:CB AT)
 (nt=:NT AT) (na=:NA AT) (nb=:NB AT) (wk=:WK AT)
 (I =:1&mb) (O =:0&mb) (mb=:MB AT)
 
@@ -62,9 +62,8 @@ AA =: {{ (u v y) v y }}
 NB. m AP v. s->s. append m to v=(buffer AT) in y
 AP =: {{ ,&m AA v y }}
 
-
 NB. nx :: state->state = move to next character (ch-:'' if past end)
-nx =: {{'nx'] i ix (i{ ::'' ib y) ch (ch y) AP tb y [ i=: 1 + ix y }}
+nx =: {{'nx'] i ix (i{ ::'' ib y) ch ((ch y) AP cb) y [ i=. 1+ix y }}
 
 NB. on: string -> s (initial parser state)
 NB. everything is stored explicitly inside
@@ -83,7 +82,7 @@ NB. the token buffer only contains one token.
 NB.
 NB. u scan: string -> tokens | error
 NB. applies rule u to (on y) and returns token buffer on success.
-NB. scan =: {{ if.mb s=.u on y do. tb s else. ,.'scan failed';<s end. }}
+NB. scan =: {{ if.mb s=.u on y do. cb s else. ,.'scan failed';<s end. }}
 
 NB. parser combinators
 NB. --------------------------------------------------
@@ -180,7 +179,7 @@ ifu =: {{ if.f=.mb s=.u y do. s=.y v s end. f mb s }}
 ifu =: {{ f mb y v^:f s [ f=.mb s=.u y }}
 
 NB. u tok: s->s move current token to NB if u matches, else fail
-tok =: ifu({{ a: TB} (TB{y) (AP nb) y }}@])
+tok =: ifu({{ a: CB} (CB{y) (AP nb) y }}@])
 
 T 'ab' lit tok on 'abc'
 
@@ -248,8 +247,8 @@ node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
 NB. x emit: s->s push item x into the current node buffer
 emit =: {{ (<x) AP nb y }}
 
-tok =: ifu {{x] '' tb (tb y) emit y }}
-tok =: ifu ('' tb tb@] emit ])
+tok =: ifu {{x] '' cb (cb y) emit y }}
+tok =: ifu ('' cb cb@] emit ])
 
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
