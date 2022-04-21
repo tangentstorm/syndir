@@ -1,7 +1,7 @@
 NB. a simple key-value dictionary system for j
 
 NB. symbol constructor (for string keys)
-sym=:(' '$:]) : (s:@:,)
+key=:(' '$:]) : (s:@:,)
 S=: 1 : 's:'' '',m'
 
 NB. constructors:
@@ -47,7 +47,7 @@ a2ubox=: (a2uboxd get ::] ])&.(3 u:])"0
 lines =: [: (<;._2) 7 u: ]
 shouldbe =: [: assert (>@lines@[) -: a2ubox@]
 
-(0 : 0) shouldbe ": ((sym 'a b c') dict ('apple';'banana';'cherry')) get sym 'b a'
+(0 : 0) shouldbe ": ((key 'a b c') dict ('apple';'banana';'cherry')) get key 'b a'
 ┌──────┬─────┐
 │banana│apple│
 └──────┴─────┘

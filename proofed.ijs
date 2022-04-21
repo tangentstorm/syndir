@@ -10,10 +10,10 @@ NB. format is: (node template) (patterns) (text template)
 defrule=: {{ G =: (y S) put (< sx (0 : 0)) G }}
 
 NB. (rule 'name') fetches the rule from the system as a triple
-rule =: {{ ,> G get sym y }}
+rule =: {{ ,> G get key y }}
 
 NB. special formatting symbols:
-'SYM_NL SYM_SP'=:sym'\n _'
+'SYM_NL SYM_SP'=:key'\n _'
 
 NB. grammar for a PL0-like language
 
@@ -80,7 +80,10 @@ p0 =: 0 : 0
 )
 
 NB. sx y -> list of boxes
-NB. boxes contain either a symbol
-render sx p0
+NB. each boxs contains one of:
+NB. - a symbol
+NB. - a string
+NB. - a list of boxes
+echo render sx p0
 
 require 'parseco.ijs'
