@@ -72,13 +72,18 @@ NB. the state tuple, to make it easy to backtrack.
 on =: {{ ({.y) ch y ib s0 }}
 match =: on
 
-NB. u parse: string -> parse tree | error
+NB. u parse: string -> [node] | error
 NB. applies rule u to (on y) and returns node buffer on success.
+NB. note that the node buffer is a *list of boxes*, even if there
+NB. is only one top-level node. It's a forest, not a tree.
 parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
 
+NB. !! this implementation makes no sense.
+NB. the token buffer only contains one token.
+NB.
 NB. u scan: string -> tokens | error
 NB. applies rule u to (on y) and returns token buffer on success.
-scan =: {{ if.mb s=.u on y do. tb s else. ,.'scan failed';<s end. }}
+NB. scan =: {{ if.mb s=.u on y do. tb s else. ,.'scan failed';<s end. }}
 
 NB. parser combinators
 NB. --------------------------------------------------
@@ -175,7 +180,7 @@ ifu =: {{ if.f=.mb s=.u y do. s=.y v s end. f mb s }}
 ifu =: {{ f mb y v^:f s [ f=.mb s=.u y }}
 
 NB. u tok: s->s move current token to NB if u matches, else fail
-tok =: ifu({{ a: TB} (TB{y) AP nb y }}@])
+tok =: ifu({{ a: TB} (TB{y) (AP nb) y }}@])
 
 T 'ab' lit tok on 'abc'
 
@@ -332,7 +337,7 @@ J_OPER =: (j_op`DIGIT`ALPHA alt)`('.:' one rep) seq
 J_OP   =: j_op
 J_NUMS =: j_num`('j'lit`j_num seq opt)seq sep (WS rep)
 J_TOKEN =: NL`J_LDEF`J_RDEF`LPAREN`RPAREN`J_NB`J_STR`J_OPER`J_NUMS`J_OP`IDENT alt
-J_LEXER =: (WS zap)`(J_TOKEN tok) alt rep
+J_LEXER =: (WS zap)`(J_TOKEN tok) alt orp
 
 J_STR on h=.'''hello'',abc'
 
@@ -372,7 +377,6 @@ examples =: {{
 examples'' NB. no output, but will complain if anything broke
 
 nil`any`end `:0@ on each '';'x'
-
                                                           hw0
                                                   'n'node hw0
                                          'e' emit 'n'node hw0
@@ -396,14 +400,6 @@ trace =: {{
   if. TRACE do. r [ smoutput m; r=.v Y=:y [ smoutput '>> ',m
   else. v y end. }}
 
-NB. decompiler
-ar =: 5!:1@<
-br =: 5!:2@<
-tr =: 5!:4@<
-ops =: ;:'nil any lit one seq alt tok sym zap opt rep orp not sep elm atr tag run'
-all =: ops,;:'try ifu'
-ALL =: toupper each all
-(ALL) =: br each all
 
 NB. s-expressions (lisp-like syntax)
 LP =: 'LP' trace (LPAREN zap)
@@ -419,6 +415,7 @@ ll =: WSz`((LPAREN tok)`(RPAREN tok)`WS`ID`(STR tok) alt)seq orp
 lisp =: '(one two (a b c) three) (banana)'
 ll parse lisp
 se parse lisp
+assert 2 = $ se parse lisp
 
 
 NB. tree matching
@@ -432,3 +429,13 @@ box =: {{
   do. smoutput 'entering box C:' [ C =: > c
       smoutput c
       f mb nx^:f s [f=.mb s=.u all on > c else. O y end. }}
+
+NB. decompiler
+cocurrent 'decompile'
+ar =: 5!:1@<
+br =: 5!:2@<
+tr =: 5!:4@<
+ops =: ;:'nil any lit one seq alt tok sym zap opt rep orp not sep elm atr tag run'
+all =: ops,;:'try ifu'
+ALL =: toupper each all
+(ALL) =: br each all
