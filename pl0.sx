@@ -1,0 +1,28 @@
+(:grammar PL0)
+(:nb "from Algorithms and Data Structures by Niklaus Wirth.")
+
+(:def program (:seq block "."))
+(:def block
+      (:seq (:opt "const" (:sep (:seq IDENT "=" NUMBER) ",") ";")
+            (:opt "var" (:sep IDENT ",") ";")
+            (:opt "procedure" IDENT ";" block ";")
+            statement))
+
+(:def statement
+      (:alt (:seq IDENT ":=" expression)
+            (:seq "call" IDENT)
+            (:seq "begin" statement (:orp (:seq ";" statement)) "end")
+            (:seq "if" condition "do" statement)
+            (:nil (:nb empty statement))))
+
+(:def condition
+      (:alt (:seq "odd" expression)
+            (:seq expression
+                  (:alt "=" "≠" "<" ">" "≤" "≥")
+                  expression)))
+
+(:def expression  (:seq term (:orp (:seq (:alt "+" "-") term))))
+
+(:def term (:seq factor (:orp (:seq (:alt "×" "÷") factor))))
+
+(:def factor (:alt IDENT NUMBER (:seq "(" expression ")")))
