@@ -84,6 +84,7 @@ NB. u scan: string -> tokens | error
 NB. applies rule u to (on y) and returns token buffer on success.
 NB. scan =: {{ if.mb s=.u on y do. cb s else. ,.'scan failed';<s end. }}
 
+
 NB. parser combinators
 NB. --------------------------------------------------
 NB. these are all adverbs (or conjunctions in the case of 'sep')
@@ -179,7 +180,7 @@ ifu =: {{ if.f=.mb s=.u y do. s=.y v s end. f mb s }}
 ifu =: {{ f mb y v^:f s [ f=.mb s=.u y }}
 
 NB. u tok: s->s move current token to NB if u matches, else fail
-tok =: ifu({{ a: CB} (CB{y) (AP nb) y }}@])
+tok =: ifu({{ '' cb (cb y) (AP nb) y }}@])
 
 T 'ab' lit tok on 'abc'
 
@@ -208,6 +209,7 @@ NB. u rep: s->s. match 1+ repetitions of u
 rep =: {{ f=.0 while. mb y =. u y do. f=.1 end. f mb y }}
 rep =: {{ s=.y while. mb s=.u s do.end. y (<&ix mb ])s }}
 rep =: {{ y (<&ix mb ]) u^:mb^:_ I y }}
+
 
 NB. while =: {{ u ^: v ^:_ y }}
 NB. rep =: {{ y (<&ix mb ]) u while mb I y }}
