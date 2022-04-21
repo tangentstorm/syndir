@@ -1,3 +1,4 @@
+NB. ------------------------------------------------------------
 NB. Parser Combinators for J
 NB.
 NB. The semantics here are heavily inspired by
@@ -7,6 +8,7 @@ NB.   http://tinlizzie.org/ometa/
 NB.
 NB. but implemented as parser combinators rather than a standalone language.
 NB.
+NB. ------------------------------------------------------------
 LICENSE =: (0 : 0)
 Copyright (c) 2021 Michal J Wallace <http://tangentstorm.com/>
 
@@ -83,11 +85,7 @@ NB. x tk: s->(item;<s). pop the last item from buffer x in state y.
 tk =: {{ ({:u y) ;< (}: AA u) y }}
 
 
-NB. match combinators
-NB. --------------------------------------------------
-NB. these are all adverbs (or conjunctions in the case of 'sep')
-NB. that take an argument describing what to match and produce
-NB. a verb from s->s
+NB. -- basic match combinators ---------------------------------
 
 NB. nil: s->s. always match, but consume nothing.
 nil =: I
@@ -132,6 +130,9 @@ alt =: {{'alt'] s=:y
     if. mb  s=. r`:6 s do. I s return. end.
   end. O y }}
 
+
+NB. -- extra utilities -----------------------------------------
+
 NB. u opt: s->s. optionally match rule u. succeed either way
 opt =: I@:
 
@@ -139,6 +140,19 @@ NB. m lit: s->s like seq for literals only.
 NB. this just matches the whole sequence directly vs S.
 NB. ,m is so we can match a single character.
 lit =: {{ y fw (#m) * m-: (#m=.,m) la y }} try
+
+NB. u rep: s->s. match 1+ repetitions of u
+rep =: {{ y (<&ix mb ]) u^:mb^:_ I y }}
+
+NB. u orp: s->s. optionally repeat (match 0+ repetitions of u)}}
+orp =: rep opt
+
+NB. u not: s->s. match anything but u.
+NB. fail if u matches or end of input, otherwise consume 1 input.
+not =: {{ (u neg)`any seq }}
+
+NB. u sep v: s->s. match 1 or more u, separated by v
+sep =: {{ u`(v`u seq orp) seq f. }}
 
 NB. -- lexers --------------------------------------------------
 
@@ -161,19 +175,6 @@ sym =: lit tok
 NB. u zap: s->s match if u matches, but drop any generated nodes
 NB. the only effect that persists is the current char and index.
 zap =: ifu(ch@] ch ix@] ix [)
-
-NB. u rep: s->s. match 1+ repetitions of u
-rep =: {{ y (<&ix mb ]) u^:mb^:_ I y }}
-
-NB. u orp: s->s. optionally repeat (match 0+ repetitions of u)}}
-orp =: rep opt
-
-NB. u not: s->s. match anything but u.
-NB. fail if u matches or end of input, otherwise consume 1 input.
-not =: {{ (u neg)`any seq }}
-
-NB. u sep v: s->s. match 1 or more u, separated by v
-sep =: {{ u`(v`u seq orp) seq f. }}
 
 
 NB. -- parsers -------------------------------------------------
