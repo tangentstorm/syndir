@@ -123,12 +123,12 @@ chr =: {{'chr'] p mb nx^:p y [ p =. m -: ch y }} try
 'a' chr on 'xyz'
 'a' chr on 'abc'
 
-NB. m one: s->s. match one item from m and advance the index.
-one =: {{'one'] p mb nx^:p y [ p =. m e.~ ch y }} try
-one =: {{ y fw m e.~ ch y }} try
+NB. m chs s->s. match any one item from m and advance ix. ('choose'/'character set')
+chs =: {{'chs'] p mb nx^:p y [ p =. m e.~ ch y }} try
+chs =: {{ y fw m e.~ ch y }} try
 
-'abc' one on 'xyz'
-'abc' one on 'cab'
+'abc' chs on 'xyz'
+'abc' chs on 'cab'
 
 
 NB. m seq: s->s. match each rule in sequence m
@@ -298,19 +298,19 @@ space =: 32{.a. NB. that's all ascii ctrl chars.
 
 NB. Some predefined tokens
 NL =: (CR lit opt)`(LF lit) seq
-ALPHA  =: alpha one
+ALPHA  =: alpha chs
 UNDER  =: '_' lit
-DIGIT  =: digit one
+DIGIT  =: digit chs
 NUMBER =: digit rep
 IDENT  =: (ALPHA`(ALPHA`DIGIT`UNDER alt orp) seq)
-HEXIT  =: hexit one
+HEXIT  =: hexit chs
 LPAREN =: '(' lit
 RPAREN =: ')' lit
 LBRACK =: '[' lit
 RBRACK =: ']' lit
 LCURLY =: '{' lit
 RCURLY =: '}' lit
-WS =: (TAB,' ') one
+WS =: (TAB,' ') chs
 WSz =: WS orp zap
 
 
@@ -322,7 +322,7 @@ NB. j syntax rules
 NB. -------------------------------
 
 NB. fragments used by the tokens:
-j_op  =: (brack,curly,other-.'_') one
+j_op  =: (brack,curly,other-.'_') chs
 j_num =: ('_' lit opt)`(DIGIT rep)`(('.'lit)`(DIGIT orp) seq opt) seq
 squo =: ''''
 squl =: squo lit
@@ -334,7 +334,7 @@ J_RDEF =: '}}'lit
 J_NB  =: (('NB','.')lit)`(NL not rep) seq
 
 J_STR =: squl`(j_esc`(squl not) alt orp)`squl seq
-J_OPER =: (j_op`DIGIT`ALPHA alt)`('.:' one rep) seq
+J_OPER =: (j_op`DIGIT`ALPHA alt)`('.:' chs rep) seq
 J_OP   =: j_op
 J_NUMS =: j_num`('j'lit`j_num seq opt)seq sep (WS rep)
 J_TOKEN =: NL`J_LDEF`J_RDEF`LPAREN`RPAREN`J_NB`J_STR`J_OPER`J_NUMS`J_OP`IDENT alt
@@ -436,7 +436,7 @@ cocurrent 'decompile'
 ar =: 5!:1@<
 br =: 5!:2@<
 tr =: 5!:4@<
-ops =: ;:'nil any lit one seq alt tok sym zap opt rep orp not sep elm atr tag run'
+ops =: ;:'nil any lit chs seq alt tok sym zap opt rep orp not sep elm atr tag run'
 all =: ops,;:'try ifu'
 ALL =: toupper each all
 (ALL) =: br each all
