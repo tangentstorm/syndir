@@ -13,7 +13,7 @@ NB. (rule 'name') fetches the rule from the system as a triple
 rule =: {{ ,> G get sym y }}
 
 NB. special formatting symbols:
-'NL SP'=:sym'\n _'
+'SYM_NL SYM_SP'=:sym'\n _'
 
 NB. grammar for a PL0-like language
 
@@ -47,27 +47,31 @@ defrule 'str'
 head =: ,@>@{.@,
 tail =: }.@,
 
-NB. render leaves, colored according to datatype
-render =: RESET ,~ [: ; visit
-visit =: {{
+NB. render nodes, colored according to datatype
+render =: RESET,~visit
+NB. visit :: [box] -> string
+visit =: ;@:(visit_box&.>)
+NB. visit_box :: contents -> string
+visit_box =: {{
   select. stype y
   case. BOX do.
-    if. 1=#y do. visit >y
-    else. NB. rule triple for node
-      'nm r t'=: ,>G get (head y)
-      R=:((;nm) dict tail y) subs t
+    if. 1 do. visit y NB. if. #y=1
+    else.
+      NB. !! todo: this part does not return a string yet.
+      'nm r t' =: ,>G get (head y)
+      ((;nm) dict tail y) subs t
     end.
   case. TXT do. (FGC _15),y      NB. fg'W'
   case. NUM do. (FGC _14),":y    NB. fg'Y'
   case. SYM do.
     select. y
-    case. NL do. LF
-    case. SP do. ' '
+    case. SYM_NL do. LF
+    case. SYM_SP do. ' '
     case. do. (FGC _6), 2 s:y  NB. sym→str  !! fg'c'
     end.
-  case. do. (FGC _7),":y
-  end.
-}}
+  case. do.
+    if. #y do. (FGC _1),":y else. '' end.
+  end. }}
 
 NB. an example program
 p0 =: 0 : 0
@@ -75,5 +79,8 @@ p0 =: 0 : 0
     (block (writeln (str "hello, world.")) ))
 )
 
-NB. TODO: get the recursive walk/template working
-render S:0 sx p
+NB. sx y -> list of boxes
+NB. boxes contain either a symbol
+render sx p0
+
+require 'parseco.ijs'
