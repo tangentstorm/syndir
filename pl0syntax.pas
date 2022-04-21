@@ -51,26 +51,25 @@ procedure VarShow(v : TVar);
         //  TODO: ignore spaces if last item was kNB (to fix seq)
         for i:=0 to len(v)-1 do VarShow(v[i])
       else if varIsOrdinal(v[0]) then try
-	case TKind(v[0]) of
-          kNB	: cwrite([ '|K', TStr(v[1])]);
-	  kHBox	: varshow(A([ join(nl, v[1]) ]));
-	  kLit	: cwrite([ '|B', TStr( v[1]) ]);
-	  kSub	: cwrite([ '|m', TStr( v[1]) ]);
-	  kOpt : varshow(A([ '|r( ', join(' ', v[1]), ' |r)?' ]));
-	  kRep : varshow(A([ '|r( ', join(' ', v[1]), ' |r)+' ]));
-          kOrp : varshow(A([ '|r( ', join(' ', v[1]), ' |r)*' ]));
-          kAlt : varshow(A([ '|r( ', join(' |r|| ', v[1]), ' |r)' ]));
-          kSeq : varshow(A([ '|>', join(' ', v[1]), '|<' ]));
-          kDef : VarShow(A(['|R@|y ', v[1], '|_|R: ',
-			    join('|_|r|| ' , v[2]), nl ]));
-        else
-	  cwrite('|!r|y'); write('<', TKind(v[0]), '>'); cwrite('|w|!k');
-	end
+        case TKind(v[0]) of
+          kNB   : cwrite([ '|K', TStr(v[1])]);
+          kHBox : varshow(A([ join(nl, v[1]) ]));
+          kLit  : cwrite([ '|B', TStr( v[1]) ]);
+          kSub  : cwrite([ '|m', TStr( v[1]) ]);
+          kOpt  : varshow(A([ '|r( ', join(' ', v[1]), ' |r)?' ]));
+          kRep  : varshow(A([ '|r( ', join(' ', v[1]), ' |r)+' ]));
+          kOrp  : varshow(A([ '|r( ', join(' ', v[1]), ' |r)*' ]));
+          kAlt  : varshow(A([ '|r( ', join(' |r|| ', v[1]), ' |r)' ]));
+          kSeq  : varshow(A([ '|>', join(' ', v[1]), '|<' ]));
+          kDef  : VarShow(A(['|R@|y ', v[1], '|_|R: ',
+                             join('|_|r|| ' , v[2]), nl ]));
+          else cwrite('|!r|y'); write('<', TKind(v[0]), '>'); cwrite('|w|!k');
+        end
       except on e:EVariantError do
-	begin debug:=true;
-	  fg('r');writeln(e.message);fg('w');
-	  cwriteln(['|c', repr(v), '|w']);
-	end
+        begin debug:=true;
+          fg('r');writeln(e.message);fg('w');
+          cwriteln(['|c', repr(v), '|w']);
+        end
       end // try..except
       else begin writeln('unhandled v[0] case:', repr(v[0])); halt end
     else if TKind(v) = kNL then cwrite('|_') // newline but with indentation
@@ -120,15 +119,15 @@ begin
             lit(';') ]),
         opt([ lit('var'), rep([ sub('ident'), '|r/', lit(',') ]), lit(';') ]),
         orp([ lit('procedure'), sub('ident'), lit(';'),
-	     sub('block'), lit(';') ]),
+        sub('block'), lit(';') ]),
         sub('statement') ]) ]) ]),
 
     def('statement', [
       seq([ sub('ident'), lit(':='), sub('expression') ]),
       seq([ lit('call'), sub('ident') ]),
       seq([ lit('begin'),
-	      sub('statement'),
-	      orp([ lit(';'), sub('statement')]),
+      sub('statement'),
+      orp([ lit(';'), sub('statement')]),
             lit('end') ]),
       seq([ lit('if'), sub('condition'), lit('then'), sub('statement') ]),
       seq([ lit('while'), sub('condition'), lit('do'), sub('statement') ]),
