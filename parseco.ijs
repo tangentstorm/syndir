@@ -29,6 +29,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 )
 
+
+NB. --- parse state --------------------------------------------
+
 NB. s0 : s. initial parse state
 s0 =: _ ; 0 ; '' ; 6#a:
 
@@ -48,9 +51,13 @@ NB.   ib = input buffer
 
 NB. accessor verbs: (v y) gets item from state,  (x v y) sets it.
 AT =: {{ m&{:: : (<@[ m} ]) }}
+
 (ix=:IX AT) (ch=:CH AT) (ib=:IB AT) (cb=:CB AT)
 (nt=:NT AT) (na=:NA AT) (nb=:NB AT) (wk=:WK AT)
+
 (I =:1&mb) (O =:0&mb) (mb=:MB AT)
+
+NB. -- "microcode" ---------------------------------------------
 
 NB. simple test framework
 T =: [:`]@.mb NB. T = assert match
@@ -69,23 +76,18 @@ NB. on: string -> s (initial parser state)
 NB. everything is stored explicitly inside
 NB. the state tuple, to make it easy to backtrack.
 on =: {{ ({.y) ch y ib s0 }}
-match =: on
 
-NB. u parse: string -> [node] | error
-NB. applies rule u to (on y) and returns node buffer on success.
-NB. note that the node buffer is a *list of boxes*, even if there
-NB. is only one top-level node. It's a forest, not a tree.
-parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
+NB. state fw y (micro) : match y chars (where y is int >: 0)
+fw =: {{ (*y) mb nx^:y x }}
 
-NB. !! this implementation makes no sense.
-NB. the token buffer only contains one token.
-NB.
-NB. u scan: string -> tokens | error
-NB. applies rule u to (on y) and returns token buffer on success.
-NB. scan =: {{ if.mb s=.u on y do. cb s else. ,.'scan failed';<s end. }}
+NB. la : lookahead
+la =: ib@] {~ ix@] + i.@[
+
+NB. x tk: s->(item;<s). pop the last item from buffer x in state y.
+tk =: {{ ({:u y) ;< (}: AA u) y }}
 
 
-NB. parser combinators
+NB. match combinators
 NB. --------------------------------------------------
 NB. these are all adverbs (or conjunctions in the case of 'sep')
 NB. that take an argument describing what to match and produce
@@ -119,12 +121,12 @@ NB. the case where we're reading past the end of the input.
 try =: :: O
 
 NB. m chr: s->s. match literal atom m and advance the index
-chr =: {{'chr'] p mb nx^:p y [ p =. m -: ch y }} try
+chr =: {{ y fw m  -: ch y }} try
+
 'a' chr on 'xyz'
 'a' chr on 'abc'
 
 NB. m chs s->s. match any one item from m and advance ix. ('choose'/'character set')
-chs =: {{'chs'] p mb nx^:p y [ p =. m e.~ ch y }} try
 chs =: {{ y fw m e.~ ch y }} try
 
 'abc' chs on 'xyz'
@@ -155,28 +157,27 @@ alt =: {{'alt'] s=:y
 F ('a'chr)`('b'chr)`('c'chr) alt on 'xyz'
 T ('a'chr)`('b'chr)`('c'chr) alt on 'abc'
 
+NB. u opt: s->s. optionally match rule u. succeed either way
+opt =: I@:
 
 NB. m lit: s->s like seq for literals only.
 NB. this just matches the whole sequence directly vs S.
 NB. ,m is so we can match a single character.
-lit =: {{'lit'] f mb nx^:(f*#m) y [ f=.m-:(ib y){~(ix y)+i.#m=.,m }} try
-
-
-fw =: {{ (*y) mb nx^:y x }}
-
-(X =: @[) (Y =: @])
-NB. lookahead
-la =: {{ (ib y) {~ (ix y) + (i. x) }}
-la =: ib@] {~ ix@] + i.@[
-la =: ib Y {~ ix Y + i. X
 lit =: {{ y fw (#m) * m-: (#m=.,m) la y }} try
 
 T 'ab' lit on 'abc'
 
+
+NB. -- lexers --------------------------------------------------
 
+NB. !! this implementation makes no sense.
+NB. the token buffer only contains one token.
+NB.
+NB. u scan: string -> tokens | error
+NB. applies rule u to (on y) and returns token buffer on success.
+NB. scan =: {{ if.mb s=.u on y do. cb s else. ,.'scan failed';<s end. }}
 
 NB. u ifu v: s->s. if u matches, return 1;<(s_old) v (s_new)
-ifu =: {{ if.f=.mb s=.u y do. s=.y v s end. f mb s }}
 ifu =: {{ f mb y v^:f s [ f=.mb s=.u y }}
 
 NB. u tok: s->s move current token to NB if u matches, else fail
@@ -190,15 +191,9 @@ sym =: lit tok
 
 T 'ab' sym on 'abc'
 
-
 NB. u zap: s->s match if u matches, but drop any generated nodes
 NB. the only effect that persists is the current char and index.
-zap =: ifu {{'zap'] (ch y) ch (ix y) ix x }}
 zap =: ifu(ch@] ch ix@] ix [)
-
-NB. u opt: s->s. optionally match rule u. succeed either way
-opt =: {{ I u y }}
-opt =: `nil alt
 
 T '3' lit opt on '1'
 T '3' lit opt on '3'
@@ -206,8 +201,6 @@ T 'a'lit`('b'lit opt)`('c'lit) seq on 'abc'
 T 'a'lit`('b'lit opt)`('c'lit) seq on 'acb'
 
 NB. u rep: s->s. match 1+ repetitions of u
-rep =: {{ f=.0 while. mb y =. u y do. f=.1 end. f mb y }}
-rep =: {{ s=.y while. mb s=.u s do.end. y (<&ix mb ])s }}
 rep =: {{ y (<&ix mb ]) u^:mb^:_ I y }}
 
 
@@ -224,10 +217,6 @@ orp =: rep opt
 
 NB. u not: s->s. match anything but u.
 NB. fail if u matches or end of input, otherwise consume 1 input.
-not =:{{
-  if. (#ib y) <: ix y do. O y
-  elseif.mb u y do. O y
-  else. I nx y end. }}
 not =: {{ (u neg)`any seq }}
 
 T 'x' lit not on 'a'
@@ -235,6 +224,16 @@ T 'x' lit not on 'a'
 
 NB. u sep v: s->s. match 1 or more u, separated by v
 sep =: {{ u`(v`u seq orp) seq f. }}
+
+
+NB. -- parsers -------------------------------------------------
+
+NB. u parse: string -> [node] | error
+NB. applies rule u to (on y) and returns node buffer on success.
+NB. note that the node buffer is a *list of boxes*, even if there
+NB. is only one top-level node. It's a forest, not a tree.
+parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
+
 
 NB. plain functions for tree building
 NB. ---------------------------------
@@ -248,33 +247,19 @@ node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
 
 NB. x emit: s->s push item x into the current node buffer
 emit =: {{ (<x) AP nb y }}
-
-tok =: ifu {{x] '' cb (cb y) emit y }}
 tok =: ifu ('' cb cb@] emit ])
 
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
-attr =: {{ if. a:-:NA{y do. y=. (0 2$a:) na s end. (m;n) AP na y }}
 attr =: {{ (m;n) AP na ((0 2$a:)&na)^:(''-:na) y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
-done =: {{
-  new =. ntup { y       NB. temp storage for the node we're closing.
-  'old s' =. wk tk y    NB. pop the previous context
-  s =. (>old) ntup } s  NB. insert it into the state
-  new emit s }}         NB. and append new node to the node buffer.
 done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
-
-NB. x tk: s->(item;<s). pop the last item from buffer x in state y.
-tk =: {{ item ; < }: AA u y [ item =. ({: u y) }}
-tk =: {{ ({:u y) ;< (}: AA u) y }}
-NB. ^looks like a fork without the parens around (AA u) (but it's not)
 
 NB. combinators for tree building.
 NB. ------------------------------
 
 NB. u elm n : s->s. create node element tagged with n if u matches
-elm =: {{ if.mb  s=.u n node y do. I done s else. O y end. }}
 elm =: {{ f mb y[`(done@])@.f s [ f=.mb s=.u n node y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
@@ -284,7 +269,8 @@ NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
 tag =: {{'tag' if.mb  s=. u y do. I tok NT } s['tok s' =. nb tk y else. O y end. }}
 
-
+
+NB. -- common lexers -------------------------------------------
 
 NB. character sets
 alpha =: a.{~ , (i.26) +/ a.i.'Aa'
@@ -421,7 +407,7 @@ assert 2 = $ se parse lisp
 
 NB. tree matching
 
-NB. u all: s->s. matchs if u matches the entire remaining input.
+NB. u all: s->s. matches if u matches the entire remaining input.
 all =: {{ (u f.)`end seq }}
 
 NB. u box: s->s. matches if current value is
@@ -436,7 +422,7 @@ cocurrent 'decompile'
 ar =: 5!:1@<
 br =: 5!:2@<
 tr =: 5!:4@<
-ops =: ;:'nil any lit chs seq alt tok sym zap opt rep orp not sep elm atr tag run'
+ops =: ;:'nil any lit chs seq alt tok sym zap opt rep orp not sep elm atr tag'
 all =: ops,;:'try ifu'
 ALL =: toupper each all
 (ALL) =: br each all
