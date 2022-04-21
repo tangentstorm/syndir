@@ -353,7 +353,7 @@ name =. 'Sally O''Malley'
 assert expect -: actual
 
 examples =: {{
-  nx^:(<#S) s0 =: on S=.'hello (world 123)'
+  nx^:(<#S) hw0 =: on S=.'hello (world 123)'
   'a'lit rep on 'aaa'
   ab =: ('a'lit)`('b'lit)
   ab seq on 'abcat'
@@ -373,14 +373,14 @@ examples'' NB. no output, but will complain if anything broke
 
 nil`any`end `:0@ on each '';'x'
 
-                                                          s0
-                                                  'n'node s0
-                                         'e' emit 'n'node s0
-                              'n2' node  'e' emit 'n'node s0
-                    'e2' emit 'n2' node  'e' emit 'n'node s0
-               done 'e2' emit 'n2' node  'e' emit 'n'node s0
-     'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node s0
-done 'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node s0
+                                                          hw0
+                                                  'n'node hw0
+                                         'e' emit 'n'node hw0
+                              'n2' node  'e' emit 'n'node hw0
+                    'e2' emit 'n2' node  'e' emit 'n'node hw0
+               done 'e2' emit 'n2' node  'e' emit 'n'node hw0
+     'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node hw0
+done 'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node hw0
 
 
 NB. simple pascal -like block
