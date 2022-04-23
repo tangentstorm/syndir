@@ -35,7 +35,7 @@ SOFTWARE.
 NB. --- parse state --------------------------------------------
 
 NB. s0 : s. initial parse state
-s0 =: _ ; 0 ; '' ; 6#a:
+s0 =: 0 ; 0 ; '' ; 6#a:
 
 NB. these names are the indices into the tuple:
 'MB IX CH CB NT NA NB WK IB' =: i.#s0
@@ -391,16 +391,6 @@ examples =: {{
 examples'' NB. no output, but will complain if anything broke
 
 nil`any`end `:0@ on each '';'x'
-                                                          hw0
-                                                  'n'node hw0
-                                         'e' emit 'n'node hw0
-                              'n2' node  'e' emit 'n'node hw0
-                    'e2' emit 'n2' node  'e' emit 'n'node hw0
-               done 'e2' emit 'n2' node  'e' emit 'n'node hw0
-     'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node hw0
-done 'e3' emit done 'e2' emit 'n2' node  'e' emit 'n'node hw0
-
-
 
 lisp =: '(one two (a b c) three) (banana)'
 ll parse lisp
