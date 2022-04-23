@@ -32,15 +32,25 @@ SOFTWARE.
 )
 
 
+NB. --- structs ------------------------------------------------
+
+NB. sg =. m AT: constructor for setter/getter verbs (accessors).
+NB. (sg y) gets item m from struct y
+NB. (x sg y) returns copy of y with with m set to x
+AT =: {{ m&{:: : (<@[ m} ]) }}
+
+NB. m struct y : create verbs for struct with name m and fields y
+NB. m is quoted name, y is space-delimited names
+struct =: {{
+  NB. constructor for empty struct:
+  ". m,'=: (a:"0)@fs' [ fs =. cut y
+  NB. accessors for each field:
+  ({{ ". x,'=:',(":y),' AT' }}&>"0 i.@#) fs
+  0 0$0}}
+
+
 NB. --- parse state --------------------------------------------
 
-NB. s0 : s. initial parse state
-s0 =: 0 ; 0 ; '' ; 6#a:
-
-NB. these names are the indices into the tuple:
-'MB IX CH CB NT NA NB WK IB' =: i.#s0
-
-NB. type s = (ix;ch;cb;nb;nt;na;wb)
 NB.   mb = match bit
 NB.   ix = current index into the input
 NB.   ch = current character, or '' after ix>#S
@@ -50,14 +60,13 @@ NB.   na = node attributes
 NB.   nb = node buffer (grows as we build rules)
 NB.   wk = work stack (grows with recursive descent)
 NB.   ib = input buffer
+'S' struct 'mb ix ch cb nt na nb wk ib'
 
-NB. accessor verbs: (v y) gets item from state,  (x v y) sets it.
-AT =: {{ m&{:: : (<@[ m} ]) }}
+NB. s0 : S. initial parse state
+s0 =: 0 mb  0 ix  ' 'ch  S''
 
-(ix=:IX AT) (ch=:CH AT) (ib=:IB AT) (cb=:CB AT)
-(nt=:NT AT) (na=:NA AT) (nb=:NB AT) (wk=:WK AT)
-
-(I =:1&mb) (O =:0&mb) (mb=:MB AT)
+I =: 1&mb
+O =: 0&mb
 
 NB. -- "microcode" ---------------------------------------------
 
@@ -190,11 +199,12 @@ NB. plain functions for tree building
 NB. ---------------------------------
 
 NB. ntup: the state indices to copy (in order) for current node
-ntup =: NT,NA,NB
+ntup =: <@nt, <@na , <@nb
+nput =: {{ (0{x) nt (1{x) na (2{x) nb y}}
 
 NB. x node: s->s. starts a new node in the parse tree with tag x
 NB. copies current node tuple to work stack
-node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
+node =: {{ x nt a: na a: nb (<ntup y) AP wk y }}
 
 NB. x emit: s->s push item x into the current node buffer
 emit =: {{ (<x) AP nb y }}
@@ -205,7 +215,7 @@ NB. initialize dict if needed
 attr =: {{ (m;n) AP na ((0 2$a:)&na)^:(''-:na) y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
-done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
+done =: {{ (ntup y) emit (>old) nput s [ 'old s'=.wk tk y }}
 
 NB. combinators for tree building.
 NB. ------------------------------
