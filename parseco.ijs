@@ -199,12 +199,11 @@ NB. plain functions for tree building
 NB. ---------------------------------
 
 NB. ntup: the state indices to copy (in order) for current node
-ntup =: <@nt, <@na , <@nb
-nput =: {{ (0{x) nt (1{x) na (2{x) nb y}}
+ntup =: (nt,na,nb) i.#s0
 
 NB. x node: s->s. starts a new node in the parse tree with tag x
 NB. copies current node tuple to work stack
-node =: {{ x nt a: na a: nb (<ntup y) AP wk y }}
+node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
 
 NB. x emit: s->s push item x into the current node buffer
 emit =: {{ (<x) AP nb y }}
@@ -215,7 +214,7 @@ NB. initialize dict if needed
 attr =: {{ (m;n) AP na ((0 2$a:)&na)^:(''-:na) y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
-done =: {{ (ntup y) emit (>old) nput s [ 'old s'=.wk tk y }}
+done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
 
 NB. combinators for tree building.
 NB. ------------------------------
