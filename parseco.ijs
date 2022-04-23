@@ -43,7 +43,7 @@ NB. m struct y : create verbs for struct with name m and fields y
 NB. m is quoted name, y is space-delimited names
 struct =: {{
   NB. constructor for empty struct:
-  ". m,'=: (a:"0)@fs' [ fs =. cut y
+  ". m,'=: (a:#~',(":#fs),'"_) : (;:@',(quote y),')' [ fs =. cut y
   NB. accessors for each field:
   ({{ ". x,'=:',(":y),' AT' }}&>"0 i.@#) fs
   0 0$0}}
