@@ -49,21 +49,50 @@ struct =: {{
   0 0$0}}
 
 
-NB. --- parse state --------------------------------------------
+NB. --- tree state ---------------------------------------------
 
-NB.   mb = match bit
-NB.   ix = current index into the input
-NB.   ch = current character, or '' after ix>#S
-NB.   mk = mark (start of current token)
+NB. you can use whatever tree builder you like (by setting
+NB. the 'tb' field in the parse state to a different locale),
+NB. provided it implements the methods in the "tree builder
+NB. interface" section.
+
+NB. In order to support backtracking, the interface requires
+NB. that every method take and return a state memento.
+
+NB. For this default implementation, the the complete state
+NB. is just stored in the memento, and the trees built are
+NB. just nested boxes.
+
+NB. -- TS --
 NB.   nt = node tag
 NB.   na = node attributes
 NB.   nb = node buffer (grows as we build rules)
 NB.   wk = work stack (grows with recursive descent)
+'TS' struct 't_nt t_na t_nb t_wk'
+
+TB =: <'parseco' NB. default namespace
+
+
+NB. --- parse state --------------------------------------------
+
+
+NB. -- S --
+NB.   mb = match bit
+NB.   ix = current index into the input
+NB.   ch = current character, or '' after ix>#S
+NB.   mk = mark (start of current token)
+NB.   tb = tree builder
+NB.   ts = tree state
 NB.   ib = input buffer
-'S' struct 'mb ix ch mk nt na nb wk ib'
+'S' struct 'mb ix ch mk ib tb ts ib    nt na nb wk'
+
+
 
 NB. s0 : S. initial parse state
-s0 =: 0 mb ] 0 ix ] ' 'ch ] 0 mk  S''
+s0 =: 0 mb ] 0 ix ] ' 'ch ] 0 mk ] S''
+
+NB. the default tree fields:
+s0 =: TB tb (TS'') ts s0
 
 NB. even simpler setters for match bit:
 I =: 1&mb
@@ -200,7 +229,6 @@ NB. note that the node buffer is a *list of boxes*, even if there
 NB. is only one top-level node. It's a forest, not a tree.
 parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
 
-
 NB. plain functions for tree building
 NB. ---------------------------------
 
@@ -221,6 +249,7 @@ attr =: {{ (m;n) AP na ((0 2$a:)&na)^:(''-:na) y }}
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
 done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
 
+
 NB. combinators for tree building.
 NB. ------------------------------
 NB. tok =: ifu {{ x] (ix y) mk (cb y) emit y }}
@@ -232,6 +261,7 @@ elm =: {{ f mb y[`(done@])@.f s [ f=.mb s=.u n node y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
 atr =: {{ if.mb  s=. u y do. I n attr it s [ 'it s'=. nb tk s else. O y end. }}
+
 
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
