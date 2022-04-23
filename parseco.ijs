@@ -242,9 +242,12 @@ node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
 NB. x emit: s->s push item x into the current node buffer
 emit =: {{ (<x) AP nb y }}
 
+NB. x head: s->s set item x to be the head(tag)
+head =: {{  x nt y }}
+
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
-attr =: {{ (m;n) AP na ((0 2$a:)&na)^:(''-:na) y }}
+attr =: {{ (m ,&< n) AP na ((0 2$a:)&na)^:(''-:na) y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
 done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
@@ -265,7 +268,7 @@ atr =: {{ if.mb  s=. u y do. I n attr it s [ 'it s'=. nb tk s else. O y end. }}
 
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
-tag =: {{'tag' if.mb  s=. u y do. I tok NT } s['tok s' =. nb tk y else. O y end. }}
+tag =: {{'tag' if.mb  s=. u y do. I it head s ['it s' =. nb tk s else. O y end. }}
 
 
 NB. -- common lexers -------------------------------------------
@@ -404,7 +407,7 @@ T ('a'lit rep)`('b'lit) seq on 'aaab'
 
 T 'x' lit not on 'a'
 
-jsrc =: 0 : 0
+jsrc =. 0 : 0
 avg =: +/ % #  NB. average is sum div len
 avg +/\>:i.10  NB. average of first 10 triangle nums (22)
 name =. 'Sally O''Malley'
@@ -414,11 +417,20 @@ name =. 'Sally O''Malley'
 [ actual =: J_LEXER parse jsrc
 assert expect -: actual
 
+aa=:ALPHA`ALPHA seq tok
+actual =: (('abc'lit tok)`(aa atr 'a0')`(aa atr 'a1')seq elm'n' parse 'abcdefg')
+expect =: ,<(<'n'),(<2 2$(<'a0'),(<<'de'),(<'a1'),<<'fg'),<,<'abc'
+'atr atr elm' assert expect -: actual
+
+actual =: aa tag`aa`aa seq elm'' parse'banana'
+expect =: ,<(<<'ba'),(<0$0),<<;._1 ' na na'
+'tag elm' assert expect -: actual
+
 
 NB. -- more examples -------------------------------------------
 NB. !! probably should move this elsewhere.
 
-examples =: {{
+examples =. {{
   nx^:(<#S) hw0 =: on S=.'hello (world 123)'
   'a'lit rep on 'aaa'
   ab =: ('a'lit)`('b'lit)
