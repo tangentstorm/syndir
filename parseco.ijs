@@ -54,19 +54,24 @@ NB. --- parse state --------------------------------------------
 NB.   mb = match bit
 NB.   ix = current index into the input
 NB.   ch = current character, or '' after ix>#S
-NB.   cb = char buffer (grows as we match characters)
+NB.   mk = mark (start of current token)
 NB.   nt = node tag
 NB.   na = node attributes
 NB.   nb = node buffer (grows as we build rules)
 NB.   wk = work stack (grows with recursive descent)
 NB.   ib = input buffer
-'S' struct 'mb ix ch cb nt na nb wk ib'
+'S' struct 'mb ix ch mk nt na nb wk ib'
 
 NB. s0 : S. initial parse state
-s0 =: 0 mb  0 ix  ' 'ch  S''
+s0 =: 0 mb ] 0 ix ] ' 'ch ] 0 mk  S''
 
+NB. even simpler setters for match bit:
 I =: 1&mb
 O =: 0&mb
+
+NB. 'character buffer' (input from mk to ix)
+cb =: ib {~ mk + i.@(ix-mk)
+
 
 NB. -- "microcode" ---------------------------------------------
 
@@ -77,7 +82,7 @@ NB. m AP v. s->s. append m to v=(buffer AT) in y
 AP =: {{ ,&m AA v y }}
 
 NB. nx :: state->state = move to next character (ch-:'' if past end)
-nx =: {{'nx'] i ix (i{ ::'' ib y) ch ((ch y) AP cb) y [ i=. 1+ix y }}
+nx =: {{i ix (i{ ::'' ib y) ch (ix~ 1+ ix) y [ i=. 1+ix y }}
 
 NB. on: string -> s (initial parser state)
 NB. everything is stored explicitly inside
@@ -176,14 +181,15 @@ NB. u ifu v: s->s. if u matches, return 1;<(s_old) v (s_new)
 ifu =: {{ f mb y v^:f s [ f=.mb s=.u y }}
 
 NB. u tok: s->s move current token to NB if u matches, else fail
-tok =: ifu({{ '' cb (cb y) (AP nb) y }}@])
+NB. (this is overridden later)
+NB. tok =: ifu({{ (ix mk (AP nb)~ cb) y }}@])
 
 NB. m sym: s->s alias for 'm lit tok'
-sym =: lit tok
+NB. sym =: lit tok
 
 NB. u zap: s->s match if u matches, but drop any generated nodes
-NB. the only effect that persists is the current char and index.
-zap =: ifu(ch@] ch ix@] ix [)
+NB. the only effect that persists is the current (ch,ix,mk).
+zap =: ifu(ix@] mk ch@] ch ix@] ix [)
 
 
 NB. -- parsers -------------------------------------------------
@@ -207,7 +213,6 @@ node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
 
 NB. x emit: s->s push item x into the current node buffer
 emit =: {{ (<x) AP nb y }}
-tok =: ifu ('' cb cb@] emit ])
 
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
@@ -218,6 +223,9 @@ done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
 
 NB. combinators for tree building.
 NB. ------------------------------
+NB. tok =: ifu {{ x] (ix y) mk (cb y) emit y }}
+tok =: ifu (ix@] mk cb@] emit ])
+sym =: lit tok
 
 NB. u elm n : s->s. create node element tagged with n if u matches
 elm =: {{ f mb y[`(done@])@.f s [ f=.mb s=.u n node y }}
