@@ -271,7 +271,8 @@ t_head =: {{ it t_nt s [ 'it s' =. t_nb tk y }}
 
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
-attr =: {{ (m ,&< n) AP na ((0 2$a:)&na)^:(''-:na) y }}
+NB. attr =: {{ (m ,&< n) AP na ((0 2$a:)&na)^:(''-:na) y }}
+t_attr =: {{ x AP t_na ((0 2$a:)&t_na)^:(''-:t_na) y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
 NB. done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
@@ -279,6 +280,7 @@ t_done =: {{ (t_ntup{y) t_emit (>old) t_ntup} s [ 'old s'=.t_wk tk y }}
 
 node =: {{ y s_ts~ x t_node ts_s y }}
 emit =: {{ y s_ts~ x t_emit ts_s y }}
+attr =: {{ y s_ts~ x t_attr ts_s y }}
 head =: {{ y s_ts~   t_head ts_s y }}
 done =: {{ y s_ts~   t_done ts_s y }}
 
@@ -292,8 +294,7 @@ NB. u elm n : s->s. create node element tagged with n if u matches
 elm =: {{ done^:mb u n node y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
-atr =: {{ if.mb  s=. u y do. I n attr it s [ 'it s'=. nb tk s else. O y end. }}
-NB. !! can i make this be an ifu form? (difference is it's a conjunction)
+atr =: {{ if.mb  s=. u y do. I (n,&<it) attr s['it s'=. nb tk s else. O y end. }}
 
 
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
