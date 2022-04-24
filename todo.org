@@ -67,9 +67,208 @@ This entails wrapping the primitives as objects.
 :ID:       cxvdgl70gog0
 :END:
 
-
 * TODO investigate JOD and see if it helps with the tech tree idea
 :PROPERTIES:
 :TS:       <2014-12-04 10:07AM>
 :ID:       s7e51mq0wog0
 :END:
+
+
+* -- old plan --
+** DONE begin with a simple proof
+:PROPERTIES:
+:TS:       <2014-12-17 06:13AM>
+:ID:       h1p1msm0dpg0
+:END:
+
+#+begin_src J
+     (a^b)^c
+  eq  a^(b*c) by rExpMul
+  eq  a^(c*b) by rMulCom
+  eq (a^c)^b  by rExpMul^:_1
+#+end_src
+
+Our goal will be to enter this proof into the system.
+
+** DONE a constructor for AST nodes
+:PROPERTIES:
+:TS:       <2014-12-17 05:45AM>
+:ID:       ho27lhl0dpg0
+:END:
+
+- [X] Constructor is a dyad.
+- [X] Left side is always a string. Use (,x) so that rank=1.
+- [X] Right side is always a rank 1 array, so use (,y) too.
+- [X] length of result is always >: 1
+- [X] rank of result is always 1
+- [X] level of result is always >:1
+
+#+begin_src J :session j
+  C=:4 :'r=.,x if. #y do. r;,y else. <r end.'
+#+end_src
+
+#+RESULTS:
+
+** DONE atomic representation of first line
+:PROPERTIES:
+:TS:       <2014-12-17 06:29AM>
+:ID:       oqrf4kn0dpg0
+:END:
+
+#+begin_src J :session j
+  (<'3'C<('3'C<'a'C'^'C'b')C'^'C'c') 5!:0
+#+end_src
+
+#+RESULTS:
+: (a ^ b) ^ c
+
+This is mostly just for reference, because the atomic representation deals with values, not the syntax used to create those values.
+
+** TODO unwrapping the first line
+:PROPERTIES:
+:TS:       <2014-12-17 06:30AM>
+:ID:       vvec9ln0dpg0
+:END:
+
+*** DONE derivation
+:PROPERTIES:
+:TS:       <2014-12-17 06:35AM>
+:ID:       cmj0ssn0dpg0
+:END:
+
+#+begin_src text
+
+            j:       NB. j:    → n:
+            n:       NB. n: $  → n: v: n:
+     n:     v: n:    NB. n: v: → (n: v: n:) v:
+ (n: v: n:) v: n:    NB. substitute
+ (a  ^  b)  ^  c
+
+#+end_src
+
+*** TODO tree constructors for the derivation
+:PROPERTIES:
+:TS:       <2014-12-17 06:52AM>
+:ID:       nm150mo0dpg0
+:END:
+
+#+begin_src J :session j
+  '`j n v'   =:( 'j:'C])`('n:'C])`('v:'C])   NB. phrases
+  '`ID NP VP'=:('ID:'C])`('NP:'C])`('VP:'C]) NB. identifiers and
+  '`CP AP'   =:('CP:'C])`('AP:'C])           NB. primitives
+#+end_src
+
+#+RESULTS:
+
+
+#+begin_src J :session j
+ j a:
+#+end_src
+
+#+RESULTS:
+: ┌──┬┐
+: │j:││
+: └──┴┘
+
+#+begin_src J :session j
+ j < n a:
+#+end_src
+
+#+RESULTS:
+: ┌──┬─────┐
+: │j:│┌──┬┐│
+: │  ││n:│││
+: │  │└──┴┘│
+: └──┴─────┘
+
+#+begin_src J :session j
+ j <n <(<n a:),(<v a:),(<n a:)
+#+end_src
+
+#+RESULTS:
+: ┌──┬────────────────────────┐
+: │j:│┌──┬───────────────────┐│
+: │  ││n:│┌─────┬─────┬─────┐││
+: │  ││  ││┌──┬┐│┌──┬┐│┌──┬┐│││
+: │  ││  │││n:││││v:││││n:│││││
+: │  ││  ││└──┴┘│└──┴┘│└──┴┘│││
+: │  ││  │└─────┴─────┴─────┘││
+: │  │└──┴───────────────────┘│
+: └──┴────────────────────────┘
+
+#+begin_src J :session j
+ j < n < (<n a:),(<v a:),(<n a:)
+#+end_src
+
+#+RESULTS:
+: ┌──┬────────────────────────┐
+: │j:│┌──┬───────────────────┐│
+: │  ││n:│┌─────┬─────┬─────┐││
+: │  ││  ││┌──┬┐│┌──┬┐│┌──┬┐│││
+: │  ││  │││n:││││v:││││n:│││││
+: │  ││  ││└──┴┘│└──┴┘│└──┴┘│││
+: │  ││  │└─────┴─────┴─────┘││
+: │  │└──┴───────────────────┘│
+: └──┴────────────────────────┘
+
+
+#+begin_src J :session j
+ j < n < (<n <(<n a:),(<v a:),(<n a:)),(<v a:),(<n a:)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+┌──┬───────────────────────────────────────────┐
+│j:│┌──┬──────────────────────────────────────┐│
+│  ││n:│┌────────────────────────┬─────┬─────┐││
+│  ││  ││┌──┬───────────────────┐│┌──┬┐│┌──┬┐│││
+│  ││  │││n:│┌─────┬─────┬─────┐│││v:││││n:│││││
+│  ││  │││  ││┌──┬┐│┌──┬┐│┌──┬┐│││└──┴┘│└──┴┘│││
+│  ││  │││  │││n:││││v:││││n:│││││     │     │││
+│  ││  │││  ││└──┴┘│└──┴┘│└──┴┘│││     │     │││
+│  ││  │││  │└─────┴─────┴─────┘││     │     │││
+│  ││  ││└──┴───────────────────┘│     │     │││
+│  ││  │└────────────────────────┴─────┴─────┘││
+│  │└──┴──────────────────────────────────────┘│
+└──┴───────────────────────────────────────────┘
+#+end_example
+
+#+begin_src J :session j
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+┌──┬──────────────────────────────────────────────────────────────────────────────┐
+│j:│┌──┬─────────────────────────────────────────────────────────────────────────┐│
+│  ││n:│┌─────────────────────────────────────────────┬────────────┬────────────┐││
+│  ││  ││┌──┬────────────────────────────────────────┐│┌──┬───────┐│┌──┬───────┐│││
+│  ││  │││n:│┌────────────┬────────────┬────────────┐│││v:│┌───┬─┐│││n:│┌───┬─┐││││
+│  ││  │││  ││┌──┬───────┐│┌──┬───────┐│┌──┬───────┐││││  ││VP:│^││││  ││ID:│c│││││
+│  ││  │││  │││n:│┌───┬─┐│││v:│┌───┬─┐│││n:│┌───┬─┐│││││  │└───┴─┘│││  │└───┴─┘││││
+│  ││  │││  │││  ││ID:│a││││  ││VP:│^││││  ││ID:│b│││││└──┴───────┘│└──┴───────┘│││
+│  ││  │││  │││  │└───┴─┘│││  │└───┴─┘│││  │└───┴─┘││││            │            │││
+│  ││  │││  ││└──┴───────┘│└──┴───────┘│└──┴───────┘│││            │            │││
+│  ││  │││  │└────────────┴────────────┴────────────┘││            │            │││
+│  ││  ││└──┴────────────────────────────────────────┘│            │            │││
+│  ││  │└─────────────────────────────────────────────┴────────────┴────────────┘││
+│  │└──┴─────────────────────────────────────────────────────────────────────────┘│
+└──┴──────────────────────────────────────────────────────────────────────────────┘
+#+end_example
+
+** TODO walk the ast to render
+:PROPERTIES:
+:TS:       <2014-12-17 08:12AM>
+:ID:       0i88bas0dpg0
+:END:
+
+#+begin_src J :session j
+  walk =: (3 : 'if. 1=#y do. walk each >y elseif. ({.y) e. ID VP NP 0 do. >{: y elseif. do. ;walk each }.y end.')"1
+  walk ast
+#+end_src
+
+#+RESULTS:
+: ^c
+
+
+
