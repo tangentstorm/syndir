@@ -267,7 +267,7 @@ NB.   t_take ts -> [it ts]  # pop last item
 NB. x t_head ts -> ts: set item x to be the head(tag)
 NB.head =: {{  x nt y }}
 NB.t_head =: {{  x t_nt y }}
-t_head =: {{  x t_nt y }}  NB. todo: should use take to reset head
+t_head =: {{ it t_nt s [ 'it s' =. t_nb tk y }}
 
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
@@ -279,7 +279,7 @@ t_done =: {{ (t_ntup{y) t_emit (>old) t_ntup} s [ 'old s'=.t_wk tk y }}
 
 node =: {{ y s_ts~ x t_node ts_s y }}
 emit =: {{ y s_ts~ x t_emit ts_s y }}
-head =: {{ y s_ts~ x t_head ts_s y }}
+head =: {{ y s_ts~   t_head ts_s y }}
 done =: {{ y s_ts~   t_done ts_s y }}
 
 NB. combinators for tree building.
@@ -289,7 +289,7 @@ tok =: ifu (ix@] mk cb@] emit ])
 sym =: lit tok
 
 NB. u elm n : s->s. create node element tagged with n if u matches
-elm =: {{ f mb y[`(done@])@.f s [ f=.mb s=.u n node y }}
+elm =: {{ done^:mb u n node y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
 atr =: {{ if.mb  s=. u y do. I n attr it s [ 'it s'=. nb tk s else. O y end. }}
@@ -299,7 +299,9 @@ NB. !! can i make this be an ifu form? (difference is it's a conjunction)
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
 NB.tag =: {{'tag' if.mb  s=. u y do. I it head s ['it s' =. nb tk s else. O y end. }}
-tag =: ifu {{x] it head s ['it s' =. nb tk y }}
+NB. tag =: ifu {{x] it head s ['it s' =. nb tk y }} <- moved to head
+tag =: ifu(head@])
+
 
 NB. -- common lexers -------------------------------------------
 
