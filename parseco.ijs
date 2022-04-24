@@ -259,11 +259,10 @@ NB. x t_emit ts -> ts: push item x into the current node buffer
 NB.emit =: {{ (<x) AP nb y }}
 t_emit =: {{ (<x) AP t_nb y }}
 
-NB.   t_take ts -> [it ts]  # pop last item
 NB. x t_head ts -> ts: set item x to be the head(tag)
-NB.head =: {{  x nt y }}
-NB.t_head =: {{  x t_nt y }}
 t_head =: {{ it t_nt s [ 'it s' =. t_nb tk y }}
+t_head =: {{ t_nt&>/(t_nb tk) y }}
+t_head =: [: t_nt&>/ (t_nb tk)
 
 NB. x t_attr ts -> ts. take last item and assign as attribute x
 t_attr =: {{ (x,&<it) AP t_na yy['it yy' =. t_nb tk y }}
