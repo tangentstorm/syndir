@@ -82,7 +82,7 @@ NB.   mk = mark (start of current token)
 NB.   tb = tree builder
 NB.   ts = tree state
 NB.   ib = input buffer
-'S' struct 'mb ix ch mk ib tb ts ib    nt na nb wk'
+'S' struct 'mb ix ch mk ib tb ts ib'
 
 NB. treebuilder defaults to this current namespace
 tb0 =: coname''
@@ -224,24 +224,12 @@ NB. u parse: string -> [node] | error
 NB. applies rule u to (on y) and returns node buffer on success.
 NB. note that the node buffer is a *list of boxes*, even if there
 NB. is only one top-level node. It's a forest, not a tree.
-parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
+parse =: {{ if.mb s=.u on y do. t_nb ts s else. ,.'parse failed';<s end. }}
 NB. !! how to do 'else' for ifu?
 
 
 NB. tree builder interface
 NB. ------------------------------------------------------------
-
-NB. ts_s (y:S) -> TS
-ts_s =:  nt t_nt    na t_na    nb t_nb   wk t_wk ts0"_
-
-NB. (x:TS) s_ts (y:S) -> S
-s_ts =: t_nt@[nt  t_na@[na  t_nb@[nb t_wk@[wk ]
-
-NB. these should cancel each other (but can't check because tag isn't defined yet)
-NB. assert (-: ts_s s_ts ]) aa tag`aa`aa seq on 'banana'
-
-
-
 
 NB. ntup: the state indices to copy (in order) for current node
 t_ntup =: (t_nt,t_na,t_nb) i.#ts0
@@ -267,8 +255,8 @@ NB. done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
 t_done =: {{ (t_ntup{y) t_emit (>old) t_ntup} s [ 'old s'=.t_wk tk y }}
 
 NB. m tbm1 s -> s. execute tree builder method m on the tree state
-tbm1 =: {{ y s_ts~   (m,'__t')~ ts_s y [ t =. tb y}}
-tbm2 =: {{ y s_ts~ x (m,'__t')~ ts_s y [ t =. tb y}}
+tbm1 =: {{ y ts~   (m,'__t')~ ts y [ t =. tb y}}
+tbm2 =: {{ y ts~ x (m,'__t')~ ts y [ t =. tb y}}
 
 
 
