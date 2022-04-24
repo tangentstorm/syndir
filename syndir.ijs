@@ -8,18 +8,30 @@ coinsert'kvm vt'
 NB. -- db-ui bridge -------------------------
 
 fetch_items =: {{
-  try. (ntx L:1 ; *@#@ndn S:1) jf ndn>jf y
+  dn =. ndn>jf y
+  try. (([: <"1 (<"0 dn),.(ntx L:1)) ; *@#@ndn S:1) jf dn
   catch. 2 $ a:
   end. }}
 
+NB. fetch_items 0
+NB. ┌──────────────────────────────────┬─────┐
+NB. │┌──────────┬──────────┬──────────┐│0 1 0│
+NB. ││┌─┬──────┐│┌─┬──────┐│┌─┬──────┐││     │
+NB. │││1│(meta)│││2│(lang)│││3│(user)│││     │
+NB. ││└─┴──────┘│└─┴──────┘│└─┴──────┘││     │
+NB. │└──────────┴──────────┴──────────┘│     │
+NB. └──────────────────────────────────┴─────┘
+
 
 NB. -- build the tree control ---------------
-tree =: UiTree L['L HC'=.fetch_items 0
-HC__tree =: HC
+tree =: UiTree fetch_items 0
 H__tree =: {.gethw_vt_''
 TX_BG__tree =: _234
-fetch_items__tree =: {{ fetch_items_base_ C{L }}
+fetch_items__tree =: {{ fetch_items_base_ (0;0) {::C{L }}
 
+NB. extract the label
+render_item__tree =: {{
+  x render_item_UiTree_ f. (0;1){::y }}
 
 NB. -- keyboard handler ---------------------
 
@@ -33,11 +45,12 @@ k_t =: toggle__tree
 
 NB. code to run instead of j prompt
 main =: {{
-  curs 0
+  curs err =. 0
   app =: UiApp ,tree
-  step__app loop_kvm_ 'base'
+  try.  step__app loop_kvm_ 'base'
+    NB. codestroy__app''
+  catch. err =. 1 end.
   curs 1 [ raw 0  [ reset''
-  NB.codestroy__app''
-}}
+  if. err do. echo dberm'' end. }}
 
 (9!:29) 1 [ 9!:27 'main _ '
