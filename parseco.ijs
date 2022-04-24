@@ -228,6 +228,7 @@ NB. applies rule u to (on y) and returns node buffer on success.
 NB. note that the node buffer is a *list of boxes*, even if there
 NB. is only one top-level node. It's a forest, not a tree.
 parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
+NB. !! how to do 'else' for ifu?
 
 NB. plain functions for tree building
 NB. ---------------------------------
@@ -264,12 +265,13 @@ elm =: {{ f mb y[`(done@])@.f s [ f=.mb s=.u n node y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
 atr =: {{ if.mb  s=. u y do. I n attr it s [ 'it s'=. nb tk s else. O y end. }}
+NB. !! can i make this be an ifu form? (difference is it's a conjunction)
 
 
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
-tag =: {{'tag' if.mb  s=. u y do. I it head s ['it s' =. nb tk s else. O y end. }}
-
+NB.tag =: {{'tag' if.mb  s=. u y do. I it head s ['it s' =. nb tk s else. O y end. }}
+tag =: ifu {{x] it head s ['it s' =. nb tk y }}
 
 NB. -- common lexers -------------------------------------------
 
