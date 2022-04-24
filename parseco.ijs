@@ -69,6 +69,8 @@ NB.   na = node attributes
 NB.   nb = node buffer (grows as we build rules)
 NB.   wk = work stack (grows with recursive descent)
 'TS' struct 't_nt t_na t_nb t_wk'
+tna0 =: (0 2$a:)  NB. initialize dictionary. used here and it 'node'
+ts0 =: tna0 t_na TS''
 
 TB =: <'parseco' NB. default namespace
 
@@ -92,7 +94,7 @@ NB. s0 : S. initial parse state
 s0 =: 0 mb ] 0 ix ] ' 'ch ] 0 mk ] S''
 
 NB. the default tree fields:
-s0 =: TB tb (TS'') ts s0
+s0 =: TB tb ts0 ts s0
 
 NB. even simpler setters for match bit:
 I =: 1&mb
@@ -231,33 +233,27 @@ parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
 NB. !! how to do 'else' for ifu?
 
 
-
-
-NB. tree adapter scaffolding:
-NB. 'TS' struct 't_nt t_na t_nb t_wk'
+NB. tree builder interface
+NB. ------------------------------------------------------------
 
 NB. ts_s (y:S) -> TS
-ts_s =:  nt t_nt    na t_na    nb t_nb   wk t_wk TS@''
+ts_s =:  nt t_nt    na t_na    nb t_nb   wk t_wk ts0"_
 
 NB. (x:TS) s_ts (y:S) -> S
 s_ts =: t_nt@[nt  t_na@[na  t_nb@[nb t_wk@[wk ]
 
-NB. these should cancel each other:
-NB. (but tag isn't defined yet)
+NB. these should cancel each other (but can't check because tag isn't defined yet)
 NB. assert (-: ts_s s_ts ]) aa tag`aa`aa seq on 'banana'
 
+
+
+
 NB. ntup: the state indices to copy (in order) for current node
-ntup =: (nt,na,nb) i.#s0
-t_ntup =: (t_nt,t_na,t_nb) i.#TS''
-
-
-
-NB. tree builder interface
-NB. ------------------------------------------------------------
+t_ntup =: (t_nt,t_na,t_nb) i.#ts0
 
 NB. x t_node: ts -> ts: starts a new node in the tree with tag x
 NB. node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
-t_node =: {{ x t_nt a:t_ntup } (<t_ntup{y) AP t_wk y }}
+t_node =: {{ x t_nt   tna0 t_na   ''t_nb  (<t_ntup{y) AP t_wk y }}
 
 NB. x t_emit ts -> ts: push item x into the current node buffer
 NB.emit =: {{ (<x) AP nb y }}
@@ -269,10 +265,8 @@ NB.head =: {{  x nt y }}
 NB.t_head =: {{  x t_nt y }}
 t_head =: {{ it t_nt s [ 'it s' =. t_nb tk y }}
 
-NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
-NB. initialize dict if needed
-NB. attr =: {{ (m ,&< n) AP na ((0 2$a:)&na)^:(''-:na) y }}
-t_attr =: {{ x AP t_na ((0 2$a:)&t_na)^:(''-:t_na) y }}
+NB. x t_attr ts -> ts. take last item and assign as attribute x
+t_attr =: {{ (x,&<it) AP t_na yy['it yy' =. t_nb tk y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
 NB. done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
@@ -294,8 +288,7 @@ NB. u elm n : s->s. create node element tagged with n if u matches
 elm =: {{ done^:mb u n node y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
-atr =: {{ if.mb  s=. u y do. I (n,&<it) attr s['it s'=. nb tk s else. O y end. }}
-
+atr =: {{ if.mb  s=. u y do. I n attr s else. O y end. }}
 
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
@@ -456,7 +449,7 @@ expect =: ,<(<'n'),(<2 2$(<'a0'),(<<'de'),(<'a1'),<<'fg'),<,<'abc'
 'atr atr elm' assert expect -: actual
 
 actual =: aa tag`aa`aa seq elm'' parse'banana'
-expect =: ,<(<<'ba'),(<0$0),<<;._1 ' na na'
+expect =: ,<(<<'ba'),(<tna0),<<;._1 ' na na'
 'tag elm' assert expect -: actual
 
 
