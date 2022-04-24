@@ -72,13 +72,9 @@ NB.   wk = work stack (grows with recursive descent)
 tna0 =: (0 2$a:)  NB. initialize dictionary. used here and it 'node'
 ts0 =: tna0 t_na TS''
 
-TB =: <'parseco' NB. default namespace
-
 
 NB. --- parse state --------------------------------------------
 
-
-NB. -- S --
 NB.   mb = match bit
 NB.   ix = current index into the input
 NB.   ch = current character, or '' after ix>#S
@@ -88,13 +84,12 @@ NB.   ts = tree state
 NB.   ib = input buffer
 'S' struct 'mb ix ch mk ib tb ts ib    nt na nb wk'
 
-
+NB. treebuilder defaults to this current namespace
+tb0 =: coname''
 
 NB. s0 : S. initial parse state
-s0 =: 0 mb ] 0 ix ] ' 'ch ] 0 mk ] S''
+s0 =: 0 mb]  0 ix]  ' 'ch]  0 mk]  tb0 tb]  ts0 ts] S''
 
-NB. the default tree fields:
-s0 =: TB tb ts0 ts s0
 
 NB. even simpler setters for match bit:
 I =: 1&mb
@@ -271,29 +266,29 @@ NB. done: s->s. closes current node and makes it an item of previous node-in pro
 NB. done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
 t_done =: {{ (t_ntup{y) t_emit (>old) t_ntup} s [ 'old s'=.t_wk tk y }}
 
-node =: {{ y s_ts~ x t_node ts_s y }}
-emit =: {{ y s_ts~ x t_emit ts_s y }}
-attr =: {{ y s_ts~ x t_attr ts_s y }}
-head =: {{ y s_ts~   t_head ts_s y }}
-done =: {{ y s_ts~   t_done ts_s y }}
+NB. m tbm1 s -> s. execute tree builder method m on the tree state
+tbm1 =: {{ y s_ts~   (m,'__t')~ ts_s y [ t =. tb y}}
+tbm2 =: {{ y s_ts~ x (m,'__t')~ ts_s y [ t =. tb y}}
+
+
 
 NB. combinators for tree building.
 NB. ------------------------------
 NB. tok =: ifu {{ x] (ix y) mk (cb y) emit y }}
-tok =: ifu (ix@] mk cb@] emit ])
+tok =: ifu (ix@] mk cb@] 't_emit'tbm2 ])
 sym =: lit tok
 
 NB. u elm n : s->s. create node element tagged with n if u matches
-elm =: {{ done^:mb u n node y }}
+elm =: {{ 't_done'tbm1^:mb u n 't_node'tbm2 y }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
-atr =: {{ if.mb  s=. u y do. I n attr s else. O y end. }}
+atr =: {{ if.mb  s=. u y do. I n 't_attr'tbm2 s else. O y end. }}
 
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
 NB.tag =: {{'tag' if.mb  s=. u y do. I it head s ['it s' =. nb tk s else. O y end. }}
 NB. tag =: ifu {{x] it head s ['it s' =. nb tk y }} <- moved to head
-tag =: ifu(head@])
+tag =: ifu('t_head'tbm1@])
 
 
 NB. -- common lexers -------------------------------------------
