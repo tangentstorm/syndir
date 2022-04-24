@@ -1,3 +1,4 @@
+#!/usr/bin/env j
 NB. syndir : a syntax directed editor
 NB. -----------------------------------------
 require 'tangentstorm/j-kvm/ui'
