@@ -71,3 +71,6 @@ k_t =: cscr@swap
 k_i =: cscr@ins@prompt@'> '
 
 BoxEd_z_ =: conew&'BoxEd'
+
+ed =: BoxEd;:'+/p:i.10'
+run__ed''
