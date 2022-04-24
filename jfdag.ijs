@@ -10,28 +10,39 @@ struct =: {{
 
 NB. -- node structure --------------------
 
-'N' struct 'ntp ntx nup ndn'
+'N' struct 'ntp ntx nkv nup ndn'
 
-N0 =: N''
+D0 =: 2 0$a:
+N0 =: D0 nkv N''
+
 
 NB. -- database api ----------------------
 
 JF =: '.dag.jf'
 
-jfr =: [: jread JF;]
-jfa =: jappend&JF
-jfw =: [ jreplace JF;]
-jfl =: 1 { jsize@JF NB. length
-jf =: jfr : jfw
+jfap =: jappend&JF       NB. append
+jfr =: [: jread JF;]     NB. read
+jfw =: [ jreplace JF;]   NB. write
+jfl =: 1 { jsize@JF      NB. length
+jf =: jfr : jfw          NB. read/write
+
 wjf =: {{ r[y jf~ r=.u&.> jf y }} NB. with jfile
 
+jfac =: {{ NB. nid jfac text -> nid  : add child
+  r =. jfap < y ntx x nup N0
+  (ndn~ r ,~ ndn) wjf x
+  r }}
 
-initdag =: {{
+jfdag0 =: {{
   assert 0=jfl''
-  jfa < '(root)'ntx  ''nup  (1+i.3)ndn N0
-  jfa < '(lang)'ntx 0 nup N0
-  jfa < '(docs)'ntx 0 nup N0
-  jfa < '(user)'ntx 0 nup N0 }}
+  root =. jfap < '(root)'ntx N0
+  meta =. root jfac '(meta)'
+  lang =. root jfac '(lang)'
+  user =. root jfac '(user)'
+
+  ebnf =. lang jfac 'ebnf'
+  gram =. lang jfac 'gram'
+  sexp =. lang jfac 'sexp' }}
 
 NB. create and initialize if necessary
-(initdag@jcreate)^:(-.@fexist) JF
+(jfdag0@jcreate)^:(-.@fexist) JF
