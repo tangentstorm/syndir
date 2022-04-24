@@ -230,30 +230,58 @@ NB. is only one top-level node. It's a forest, not a tree.
 parse =: {{ if.mb s=.u on y do. nb s else. ,.'parse failed';<s end. }}
 NB. !! how to do 'else' for ifu?
 
-NB. plain functions for tree building
-NB. ---------------------------------
+
+
+
+NB. tree adapter scaffolding:
+NB. 'TS' struct 't_nt t_na t_nb t_wk'
+
+NB. ts_s (y:S) -> TS
+ts_s =:  nt t_nt    na t_na    nb t_nb   wk t_wk TS@''
+
+NB. (x:TS) s_ts (y:S) -> S
+s_ts =: t_nt@[nt  t_na@[na  t_nb@[nb t_wk@[wk ]
+
+NB. these should cancel each other:
+NB. (but tag isn't defined yet)
+NB. assert (-: ts_s s_ts ]) aa tag`aa`aa seq on 'banana'
 
 NB. ntup: the state indices to copy (in order) for current node
 ntup =: (nt,na,nb) i.#s0
+t_ntup =: (t_nt,t_na,t_nb) i.#TS''
 
-NB. x node: s->s. starts a new node in the parse tree with tag x
-NB. copies current node tuple to work stack
-node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
 
-NB. x emit: s->s push item x into the current node buffer
-emit =: {{ (<x) AP nb y }}
 
-NB. x head: s->s set item x to be the head(tag)
-head =: {{  x nt y }}
+NB. tree builder interface
+NB. ------------------------------------------------------------
+
+NB. x t_node: ts -> ts: starts a new node in the tree with tag x
+NB. node =: {{ x nt a: ntup } (<ntup{y) AP wk y }}
+t_node =: {{ x t_nt a:t_ntup } (<t_ntup{y) AP t_wk y }}
+
+NB. x t_emit ts -> ts: push item x into the current node buffer
+NB.emit =: {{ (<x) AP nb y }}
+t_emit =: {{ (<x) AP t_nb y }}
+
+NB.   t_take ts -> [it ts]  # pop last item
+NB. x t_head ts -> ts: set item x to be the head(tag)
+NB.head =: {{  x nt y }}
+NB.t_head =: {{  x t_nt y }}
+t_head =: {{  x t_nt y }}  NB. todo: should use take to reset head
 
 NB. m attr n: s->s. append (m=key;n=value) pair to the attribute dictionary.
 NB. initialize dict if needed
 attr =: {{ (m ,&< n) AP na ((0 2$a:)&na)^:(''-:na) y }}
 
 NB. done: s->s. closes current node and makes it an item of previous node-in progress.
-done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
+NB. done =: {{ (ntup{y) emit (>old) ntup} s [ 'old s'=.wk tk y }}
+t_done =: {{ (t_ntup{y) t_emit (>old) t_ntup} s [ 'old s'=.t_wk tk y }}
 
-
+node =: {{ y s_ts~ x t_node ts_s y }}
+emit =: {{ y s_ts~ x t_emit ts_s y }}
+head =: {{ y s_ts~ x t_head ts_s y }}
+done =: {{ y s_ts~   t_done ts_s y }}
+
 NB. combinators for tree building.
 NB. ------------------------------
 NB. tok =: ifu {{ x] (ix y) mk (cb y) emit y }}
