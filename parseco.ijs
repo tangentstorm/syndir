@@ -465,6 +465,12 @@ ll parse lisp
 se parse lisp
 assert 2 = $ se parse lisp
 
+
+NB. -- tree walker ---------------------------------------------
+
+NB. u t_visit tree -> [result] : apply u to each node of the tree.
+t_visit =: {{ (u y),, u t_visit every (#~ (<'boxed')=datatype each) t_nb y }}
+assert (;:'a b d g') -: t_nt t_visit ts se on'(a (b c (d e) f (g h))))'
 
 
 NB. -- decompiler ----------------------------------------------
