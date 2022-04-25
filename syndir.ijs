@@ -25,13 +25,13 @@ NB. └────────────────────────�
 
 NB. -- build the tree control ---------------
 tree =: UiTree fetch_items 0
-H__tree =: {.gethw_vt_''
+'H__tree W__tree' =: gethw_vt_''
 TX_BG__tree =: _234
 fetch_items__tree =: {{ fetch_items_base_ (0;0) {::C{L }}
 
 NB. extract the label
 render_item__tree =: {{
-  x render_item_UiTree_ f. (0;1){::y }}
+  x render_item_UiTree_ f. 7 u: (0;1){::y }}
 
 NB. -- keyboard handler ---------------------
 
