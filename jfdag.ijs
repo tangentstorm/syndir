@@ -1,6 +1,7 @@
 NB. tree/dag database stored in a single jfile.
 NB. each node is a component
 require 'jfiles' NB. jcreate, jerase, jappend, jread, jreplace, jdup, jsize
+require 'parseco.ijs'
 
 NB. -- struct builder (see parseco.ijs) --
 AT =: {{ m&{:: : (<@[ m} ]) }}
@@ -33,7 +34,17 @@ jfc =: {{ NB. nid jfc text -> nid  : add child
   (ndn~ r ,~ ndn) wjf x
   r }}
 
-{{ (y)=: i.#;:y }}'JF_ROOT JF_META JF_LANGS JF_TREES JF_EBNF JF_JSON'
+{{ (y)=: i.#;:y }}'JF_ROOT JF_META JF_LANGS JF_TREES JF_EBNF JF_JSON JF_PL0'
+
+is_tree_node =: (3=#) *. 'boxed'-:datatype
+import_tree =: {{
+  nid =. x jfc >t_nt y
+  for_box. t_nb y do.
+    item =. >box
+    if. is_tree_node item do. nid import_tree item
+    else. nid jfc item end.
+  end.
+  nid}}
 
 jf0 =: {{
   assert 0=jfl''
@@ -42,7 +53,12 @@ jf0 =: {{
   assert JF_LANGS = JF_ROOT jfc 'JF_LANGS'
   assert JF_TREES = JF_ROOT jfc 'JF_TREES'
   assert JF_EBNF  = JF_LANGS jfc 'ebnf'
-  assert JF_JSON  = JF_LANGS jfc 'json' }}
+  assert JF_JSON  = JF_LANGS jfc 'json'
+
+  NB. auto-mount the pl0 grammar
+  pl0 =. 'pl0' t_nt 3{.ts se on CRLF -.~ freads'pl0.sx'
+  assert JF_PL0 = JF_LANGS import_tree pl0
+}}
 
 NB. create and initialize if necessary
 (jf0@jcreate)^:(-.@fexist) JF
