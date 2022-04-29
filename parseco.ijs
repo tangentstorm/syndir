@@ -364,9 +364,10 @@ RP =: 'RP' trace (RPAREN zap)
 ID =: 'ID' trace (LP`RP`WS`DQ alt not rep tok)
 
 NB. se: s-expression parser
-se_a =: ID`STR`INT`WSz alt NB. just the atoms
-se_p =: 'se' trace (WSz`LP`((se_a tag opt)`(se_p`se_a alt orp)seq)`RP seq elm '' sep WSz)
-se =: end`se_p alt
+se_a =: ID`STR`INT alt NB. just the atoms
+se_p =: 'se' trace (WSz`LP`((se_a tag opt)`se_s seq)`RP seq elm '' sep WSz)
+se_s =: se_p`se_a`WSz alt orp
+se =: end`se_s alt
 
 NB.se_p =: LP`((se_a tag opt)`(WSz`se_p`se_a alt orp)seq)`RP seq elm ''
 NB.se =: (WSz`end seq)`(se_p`se_a alt sep WSz) alt
