@@ -24,8 +24,7 @@ sx =: {{
   if. (-.mb res) +. (ix<<:@#@ib)res do.
     [:'parse failed'
   end.
-  to_sym =: {{
-  if. *./y e.Num_j_ do. 0".y else. s:<y end. }}
+  to_sym =: {{ if. *./y e.Num_j_ do. 0".y else. s:<y end. }}
   if. mb res do.
     to_sym L:0^:(*@#) no_attrs 3{.ts res
   end. }}
