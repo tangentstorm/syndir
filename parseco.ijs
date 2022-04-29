@@ -336,10 +336,11 @@ J_LEXER =: (WS zap)`(J_TOKEN tok) alt orp
 
 J_STR on h=.'''hello'',abc'
 
-NB. c-style strings
+NB. c-style strings/numbers
 STR_ESC =: ('\'lit)`any seq
 DQ =: '"'lit
 STR =: DQ`(STR_ESC`(DQ not) alt orp)`DQ seq tok
+INT =: DIGIT rep
 
 
 NB. -- parser examples -----------------------------------------
@@ -363,8 +364,12 @@ RP =: 'RP' trace (RPAREN zap)
 ID =: 'ID' trace (LP`RP`WS`DQ alt not rep tok)
 
 NB. se: s-expression parser
-se_a =: ID`STR`WSz alt NB. just the atoms
-se =: 'se' trace (WSz`LP`((se_a tag opt)`(se`se_a alt orp)seq)`RP seq elm '' sep WSz)
+se_a =: ID`STR`INT`WSz alt NB. just the atoms
+se_p =: 'se' trace (WSz`LP`((se_a tag opt)`(se_p`se_a alt orp)seq)`RP seq elm '' sep WSz)
+se =: end`se_p alt
+
+NB.se_p =: LP`((se_a tag opt)`(WSz`se_p`se_a alt orp)seq)`RP seq elm ''
+NB.se =: (WSz`end seq)`(se_p`se_a alt sep WSz) alt
 
 NB. ll: lisp lexer
 ll =: WSz`((LPAREN tok)`(RPAREN tok)`WS`ID`(STR tok) alt)seq orp
