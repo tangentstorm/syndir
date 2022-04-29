@@ -340,7 +340,7 @@ NB. c-style strings/numbers
 STR_ESC =: ('\'lit)`any seq
 DQ =: '"'lit
 STR =: DQ`(STR_ESC`(DQ not) alt orp)`DQ seq tok
-INT =: DIGIT rep
+INT =: DIGIT rep tok
 
 
 NB. -- parser examples -----------------------------------------
