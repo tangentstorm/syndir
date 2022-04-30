@@ -1,6 +1,30 @@
 * syndir: a syntax directed editor
 
-See [[https://docs.google.com/document/d/115Y4hPnzrS8OxhXIqGbnEXVVPx_42G1p5b-fkIfFStE/edit?usp=sharing][this google doc]] for an overview of the project.
+** Goals (what will it do?)
+
+The goal is to produce a tool that allows performing arbitrary operations on code, including:
+
+- browsing
+- refactoring
+- correctness proofs
+- literate programming
+- version control
+- automatic inlining and minimization
+- peer review
+
+Everything is stored in a graph database, allowing fine grained version control, hypertext navigation, and literate programming.
+
+Text entry is syntax directed, meaning that code is stored internally as a graph structure, rather  than just lines of text.
+
+New code can be entered as text, but it is immediately parsed and converted to a graph structure.
+
+Alternatively, text entry can be restricted to applications of syntactic production rules based on a formally defined grammar, also stored in the graph database.
+
+Existing code can be modified in place according to predefined rules of inference, allowing code to be transformed or refined automatically while preserving or generalizing the semantics.
+
+Each transformation step is also stored in the database, and sequences of transformations can serve as version control history or be presented as a proof of equivalence or implication between two expressions.
+
+Once these tools are working, the system can be used to bootstrap its own replacement, where the entire system is formally proven and automatically verified from the first line of code.
 
 * dependency tree (indented items are used by the modules above)
 
