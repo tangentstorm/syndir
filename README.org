@@ -16,12 +16,10 @@ The rest are not yet connected:
   - stringdb.ijs  :: persistent key-value store (uses jfiles)
 
 - proofed.ijs       :: tree-centric syntax directed editor
-  - stype.ijs       :: (redundant) wrapper for j's type inspection primitive
+  - stype.ijs       :: type inspection (redundant?)
   - unify.ijs       :: unification algorithm
     - sx.ijs        :: s-expressions
-      - boxer.ijs   :: nested object builder
-      - cheq.ijs    :: testing tool
+      - parseco.ijs :: parser combinators
     - dict.ijs      :: in-memory key-value dictionaries
 
 - unparse.ijs     :: unparser/pretty-printer
-- parseco.ijs     :: parser combinators
