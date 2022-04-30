@@ -2,18 +2,22 @@
 
 See [[https://docs.google.com/document/d/115Y4hPnzrS8OxhXIqGbnEXVVPx_42G1p5b-fkIfFStE/edit?usp=sharing][this google doc]] for an overview of the project.
 
-* files (indented items are used by the modules above)
+* dependency tree (indented items are used by the modules above)
 
 - syndir.ijs      :: (eventually) the main application
-  - boxed.ijs     :: boxed token editor widget
-    - list.ijs    :: list data type
-    - cursor.ijs  :: cursor object
+  - [[https://github.com/tangentstorm/j-kvm/][j-kvm]]         :: console ui framework
+  - jfdag.ijs     :: persistent DAG as document/AST store.
+    - [[https://code.jsoftware.com/wiki/Guides/Component_Files][jfiles]]      :: j component files
 
-The rest are not yet connected:
+Various alternate implementations/attempts to be merged with above:
 
 - graphdb.ijs     :: simple graph database / triple store
   - mvars.ijs     :: helper for memory mapped variables (uses jmf)
   - stringdb.ijs  :: persistent key-value store (uses jfiles)
+
+- boxed.ijs       :: boxed token editor widget
+  - list.ijs      :: list data type
+  - cursor.ijs    :: cursor object
 
 - proofed.ijs       :: tree-centric syntax directed editor
   - stype.ijs       :: type inspection (redundant?)
@@ -22,4 +26,17 @@ The rest are not yet connected:
       - parseco.ijs :: parser combinators
     - dict.ijs      :: in-memory key-value dictionaries
 
+- rel.ijs  :: relational programming (with syntax directed example)
+
+*PL/0* is a toy language designed by Niklaus Wirth for teaching compilers.
+
+- pl0.sx           :: pl/0 grammar as an s-expression.
+- load-pl0.ijs     :: load pl0.sx into jfdag database.
+- pl0syntax.ijs    :: unparse and pretty-print the pl0 grammar.
+
+The =old= directory contains older prototype components,
+and will likely be removed:
+
 - unparse.ijs     :: unparser/pretty-printer
+- sx-by-hand.ijs  :: handwritten s-expression parser
+- boxer           :: tree/stack builder based on boxes

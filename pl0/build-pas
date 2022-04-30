@@ -1,0 +1,4 @@
+# fpc is https://www.freepascal.org/
+# ~/x is https://github.com/tangentstorm/xpl
+
+fpc -Fu~/x/code -Fi~/x/code pl0syntax.pas
