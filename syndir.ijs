@@ -22,21 +22,39 @@ NB. ││└─┴──────┘│└─┴──────┘│└�
 NB. │└──────────┴──────────┴──────────┘│     │
 NB. └──────────────────────────────────┴─────┘
 
+
+NB. -- tree control -------------------------
 
-NB. -- build the tree control ---------------
 tree =: UiTree fetch_items 0
 'H__tree W__tree' =: _1 0 + gethw_vt_''
 TX_BG__tree =: _234
 fetch_items__tree =: {{ fetch_items_base_ (0;0) {::C{L }}
 
 nid__tree =: {{ 0{::>C{L }}
+txt__tree =: {{ 1{::>C{L }}
+ind__tree =: {{ 2+C{D }} NB. indentation
 
 NB. extract the label
 render_item__tree =: {{
   x render_item_UiTree_ f. 7 u: (0;1){::y }}
 
+
 NB. line editor control
 
+led =: UiEditWidget''
+V__led =: 0
+NB.BG__led =: CU_BG__tree
+NB.FG__led =: CU_FG__tree
+
+edit_item =: {{
+  XY__led =: (C__tree,~ind__tree'') + XY__tree
+  W__led =: W__tree - ind__tree''
+  B__led =: txt__tree''
+  V__led =: 1
+  F__app =: led
+}}
+
+
 NB. -- status line  -------------------------
 
 stat =: UiWidget''
@@ -50,24 +68,32 @@ render__stat =: {{
   ceol''
 }}
 
-
+
 NB. -- keyboard handler ---------------------
 
 k_nul =: {{ exit 0 [ curs 1 [ raw 0 }} NB. ctrl-space/ctrl-@
-k_n =: fwd__tree
-k_p =: bak__tree
-k_u =: upw__tree
+
+cocurrent tree
+k_n =: fwd
+k_p =: bak
+k_u =: upw
 k_q =: {{break_kvm_=:1}}
-k_t =: toggle__tree
+k_t =: toggle
+k_e =: edit_item_base_
+k_i =: 1&ins_item_base_
+k_I =: 0&ins_item_base_
+k_c =: 0&ins_child_base_
+k_C =: 1&ins_child_base_
 
+cocurrent 'base'
+
+on_accept__led =: {{
+  V =: 0
+  app =. app_base_
+  F__app =: tree_base_
+}}
+
 NB. code to run instead of j prompt
-main =: {{
-  curs err =. 0
-  app =: UiApp tree,stat
-  try.  step__app loop_kvm_ 'base'
-    NB. codestroy__app''
-  catch. err =. 1 end.
-  curs 1 [ raw 0  [ reset''
-  if. err do. echo dberm'' end. }}
+app =: UiApp tree,stat,led
 
-(9!:29) 1 [ 9!:27 'main _ '
+(9!:29) 1 [ 9!:27 'run__app _ '
