@@ -32,7 +32,11 @@ fetch_items__tree =: {{ fetch_items_base_ (0;0) {::C{L }}
 
 nid__tree =: {{ 0{::>C{L }}
 txt__tree =: {{ 1{::>C{L }}
+set_txt__tree =: {{ L=:(<(<y)1}>C{L)C}L }}
+
 ind__tree =: {{ 2+C{D }} NB. indentation
+
+
 
 NB. extract the label
 render_item__tree =: {{
@@ -47,6 +51,7 @@ NB.BG__led =: CU_BG__tree
 NB.FG__led =: CU_FG__tree
 
 edit_item =: {{
+  C__led =: 0
   XY__led =: (C__tree,~ind__tree'') + XY__tree
   W__led =: W__tree - ind__tree''
   B__led =: txt__tree''
@@ -54,6 +59,14 @@ edit_item =: {{
   F__app =: led
 }}
 
+
+on_accept__led =: {{
+  V =: 0
+  tree =. tree_base_ [ app =. app_base_
+  F__app =: tree
+  set_txt__tree B
+  (B & ntx_base_) wjf_base_ nid__tree''
+}}
 
 NB. -- status line  -------------------------
 
@@ -86,12 +99,6 @@ k_c =: 0&ins_child_base_
 k_C =: 1&ins_child_base_
 
 cocurrent 'base'
-
-on_accept__led =: {{
-  V =: 0
-  app =. app_base_
-  F__app =: tree_base_
-}}
 
 NB. code to run instead of j prompt
 app =: UiApp tree,stat,led
