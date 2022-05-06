@@ -22,12 +22,12 @@ NB. -- database api ----------------------
 JF =: '.dag.jf'
 
 jfa =: jappend&JF        NB. append
-jfr =: [: jread JF;]     NB. read
-jfw =: [ jreplace JF;]   NB. write
+jfr =: [: jread JF;]     NB. read slot y
+jfw =: [ jreplace JF;]   NB. write x to slot y
 jfl =: 1 { jsize@JF      NB. length
-jf =: jfr : jfw          NB. read/write
+jf =: jfr_base_ : jfw_base_          NB. read/write
 
-wjf =: {{ r[y jf~ r=.u&.> jf y }} NB. with jfile
+wjf =: {{ r[y jf_base_~ r=.u&.> jf_base_ y }} NB. with jfile
 
 jfc =: {{ NB. nid jfc text -> nid  : add child
   r =. jfa < y ntx x nup N0
@@ -56,7 +56,7 @@ jf0 =: {{
   assert JF_JSON  = JF_LANGS jfc 'json'
 
   NB. auto-mount the pl0 grammar
-  pl0 =. 'pl0' t_nt 3{.ts se on CRLF -.~ freads'pl0.sx'
+  pl0 =. 'pl0' t_nt 3{.ts se on CRLF -.~ freads'pl0/pl0.sx'
   assert JF_PL0 = JF_LANGS import_tree pl0
 }}
 
