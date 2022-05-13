@@ -15,14 +15,14 @@ NB. parser combinators for regular expressions
 rx_lit =: ALPHA rep tok elm'lit'
 rx_chs =: LBRACK`(ALPHA rep)`RBRACK seq elm'chs'
 
-rx_mod =: (nil elm'mod')`('?+*'chs tok tag) seq
+NB. rx_mod =: (nil elm'mod')`('?+*'chs tok tag) seq
 rx_grp =: LP`rx_alt`RP seq elm'grp'
 rx_trm =: rx_lit`rx_chs`rx_grp alt
 rx_opt =: rx_trm`('?'lit zap) seq elm'opt'
 rx_rep =: rx_trm`('+'lit zap) seq elm'rep'
 rx_orp =: rx_trm`('*'lit zap) seq elm'orp'
 rx_seq =: rx_opt`rx_rep`rx_orp`rx_trm alt rep elm'seq'
-rx_alt =: rx_seq`('|'lit zap`rx_seq alt orp) seq elm'alt'
+rx_alt =: rx_seq`('|'lit zap`rx_seq seq orp) seq elm'alt'
 rx0 =: rx_alt`end seq elm'rx'
 
 T rx0 on 'a'
@@ -35,7 +35,7 @@ T rx0 on '(a|b)+'
 simp =: {{ NB. simplify rx parse tree
  if. -. 'boxed'-:datatype y do. y return. end.
  h=.{.y [ t=.}.y
- if. h e. ;:'alts seq grp trm' do.
+ if. h e. ;:'alt seq grp trm' do.
    NB. eliminate these nodes if only one element
    if.1=#t do. simp 0{::t return. end.
  end.
@@ -45,3 +45,19 @@ noa =: [: no_attrs 0{:: t_nb@ts
 rx1 =: noa @ rx0 @ on
 rx2 =: simp @ rx1
 rx =: rx2
+
+encs =: 1|.')(',]
+gers =: '`' joinstring (encs each)
+jsrc =: {{ NB. jsrc rx pattern -> j source
+  h=.{.y [ t=.}.y
+  select. h
+  case. 'rx' do. jsrc 0{::t
+  case. 'alt' do. (gers jsrc&.> t),' alt'
+  case. 'seq' do. (gers jsrc&.> t),' seq'
+  case. 'lit' do. (quote@;t),' lit'
+  case. 'chs' do. (quote@;t),' chs'
+  case. 'opt' do. (jsrc 0{::t),' opt'
+  case. 'rep' do. (jsrc 0{::t),' rep'
+  case. 'orp' do. (jsrc 0{::t),' orp'
+  case. do. ,":y return.
+  end. }}
