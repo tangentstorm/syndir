@@ -267,7 +267,10 @@ tok =: ifu (ix@] mk cb@] 't_emit'tbm2 ])
 sym =: lit tok
 
 NB. u elm n : s->s. create node element tagged with n if u matches
-elm =: {{ 't_done'tbm1^:mb u n 't_node'tbm2 y }}
+NB.elm =: {{ 't_done'tbm1^:mb u n 't_node'tbm2 y }}
+elm =: {{
+  if.mb s=. u n 't_node'tbm2 y do.'t_done'tbm1 s
+  else. O y end. }}
 
 NB. u atr n : s->s. if u matched, move last item to node attribute n.
 atr =: {{ if.mb  s=. u y do. I n 't_attr'tbm2 s else. O y end. }}
@@ -275,7 +278,7 @@ atr =: {{ if.mb  s=. u y do. I n 't_attr'tbm2 s else. O y end. }}
 NB. u tag: s->s. move the last token in node buffer to be the node's tag.
 NB. helpful for rewriting infix notation, eg  (a head(+) b) -> (+ (a b))
 NB.tag =: {{'tag' if.mb  s=. u y do. I it head s ['it s' =. nb tk s else. O y end. }}
-NB. tag =: ifu {{x] it head s ['it s' =. nb tk y }} <- moved to head
+NB. tag =: ifu {{x] it head s ['it s' =. nb tk y }} NB.<- moved to head
 tag =: ifu('t_head'tbm1@])
 
 
