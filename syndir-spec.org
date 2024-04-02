@@ -1,0 +1,54 @@
+#+title: syndir program specification
+# may 8 2022
+* top level: command interpreter / gui
+
+Like most GUI applications, syndir as a whole does not "do" much on
+its own. Rather, it provides a visual display of one or more
+documents, and waits passively for the user to modify a document by
+invoking various commands.
+
+* graph database structure
+
+All documents live in a graph database, currently provided by =jfdag.ijs=.
+
+# (Probably the name 'dag' is a misnomer, as there is no particular reason to only allow acyclic graphs).
+
+The graph database is seeded with nodes designed to keep documents organized.
+
+The database is a j component file, meaning that each node is a value in a single persistent vector of boxes.
+
+Each node has two list of links: 'up' and 'dn' . Links are simply positive integers, indicating the index of other nodes in the vector.
+
+Node 0 (labeled =JF_ROOT=) is a special node that holds links to other important parts of the database:
+
+- node =JF_META= is reserved for future use.
+- node =JF_LANGS= contains descriptions of various language grammars.
+- node =JF_TREES= contains documents authored in those languages.
+
+* document structure
+
+Documents are trees within the larger graph structure. Their roots are children of =JF_TREES=.
+
+
+* why write a syntax-directed editor?
+- editor should be aware of AST so you can do things like:
+  - refactoring
+  - proofs
+
+* what does the system allow you to do?
+** a: syndir
+*** create new documents
+*** load documents from disk
+*** import some code and see its structure
+*** save documents as files
+*** manipulate a single line of j code (j statement)
+*** specify and validate algorithms
+** b: not sure if syndir or not
+*** tangle and weave programs
+*** construct programs by stepwise (stackwise) refinement
+** c: other related apps (minneron?)
+*** help me index and collect code, ideas, etc.
+*** organize ideas in outlines
+*** construct (j-kvm) user interfaces?
+*** manage small tables of data
+*** interact with a repl
