@@ -109,6 +109,7 @@ AP =: {{ ,&m AA v y }}
 
 NB. nx :: state->state = move to next character (ch-:'' if past end)
 nx =: {{i ix (i{ ::'' ib y) ch (ix~ 1+ ix) y [ i=. 1+ix y }}
+nx =: {{i ix (i{ ::'' ib y) ch y [ i=. 1 + ix y }}
 
 NB. on: string -> s (initial parser state)
 NB. everything is stored explicitly inside
