@@ -1,80 +1,214 @@
 #+title: syndir: a syntax directed editor
 
-* DONE start with basic console io primitives
+* DONE line editor
+# The 'list.ijs' here was the original, but j-kvm/ui/list.ijs is an improvement.
+** DONE start with basic console io primitives
 :PROPERTIES:
 :TS:       <2014-12-04 07:38AM>
 :ID:       78uknqj0wog0
 :END:
 
-* DONE render a horizontal sequence of items
+** DONE render a horizontal sequence of items
 :PROPERTIES:
 :TS:       <2014-12-04 07:39AM>
 :ID:       ai9borj0wog0
 :END:
 
-* DONE implement a cursor that traverses the sequence
+** DONE implement a cursor that traverses the sequence
 :PROPERTIES:
 :TS:       <2014-12-04 07:40AM>
 :ID:       xareqtj0wog0
 :END:
 
-* DONE hook the cursor up to input events for user interaction
+** DONE hook the cursor up to input events for user interaction
 :PROPERTIES:
 :TS:       <2014-12-04 07:41AM>
 :ID:       a083duj0wog0
 :END:
 
-* DONE allow inserting, deleting, swapping items in the sequence
+** DONE allow inserting, deleting, swapping items in the sequence
 :PROPERTIES:
 :TS:       <2014-12-04 07:39AM>
 :ID:       4h6k9sj0wog0
 :END:
 
-* TODO generalize the cursor to work on arbitrary sequences.
-:PROPERTIES:
-:TS:       <2014-12-04 10:05AM>
-:ID:       a6sbxiq0wog0
-:END:
-This entails wrapping the primitives as objects.
 
-* TODO expand cursor to allow editing trees
+* TODO make a series of prototypes
 :PROPERTIES:
-:TS:       <2014-12-04 07:41AM>
-:ID:       63qe8vj0wog0
+:TS:       <2022-05-10 07:10PM>
+:ID:       hj2b7h01agj0
+:END:
+** TODO parser for meta-grammar
+:PROPERTIES:
+:TS:       <2022-05-10 07:13PM>
+:ID:       r0xebm01agj0
+:END:
+- regex style syntax
+- deal with [+-?*] suffixes
+  - probably not actually a problem but it bothers me
+- decide how to approach precedence
+** TODO briefly discuss embedding directly in the gerund
+- using gerunds anyway for seq
+- can parse boxed items just as easily as characters
+: any lit on;:'^([a-z]+\w)|hel.lo*'
+
+- can't type raw parens in gerund
+- but the boxed '(' string is fine
+  - can use {: }: for grouping
+    - if using ;: could have parens translate
+  - [`] for charsets
+  - +*?|^$ are all valid gerund members
+  - boxed string literals
+- can use {. }. for charsets
+
+but:
+- to use this syntax you're writing a parser for the gerund anyway
+- so why not just parse a string?
+
+** TODO builder for j's sequential machine
+:PROPERTIES:
+:TS:       <2022-05-10 07:51PM>
+:ID:       2zb3md21agj0
+:END:
+- no point in doing all of pcre since j already has that:
+https://www.pcre.org/original/doc/html/pcresyntax.html
+
+"Regular Expression Matching can be Simple and Fast"
+https://swtch.com/~rsc/regexp/regexp1.html
+
+** TODO demo for backreferences / unification
+:PROPERTIES:
+:TS:       <2022-05-10 08:27PM>
+:ID:       q4sga141agj0
 :END:
 
-** TODO start by only allowing appends since that seems easiest.
+** TODO unparser for j parser combinators
 :PROPERTIES:
-:TS:       <2014-12-04 07:45AM>
-:ID:       gyxj72k0wog0
+:TS:       <2022-05-10 07:50PM>
+:ID:       f4l3ub21agj0
 :END:
 
-* TODO unparse a tree
+** TODO enhanced line editor/repl for j statements
 :PROPERTIES:
-:TS:       <2014-11-20 11:56AM>
-:ID:       912c9k80eog0
+:TS:       <2022-05-10 07:10PM>
+:ID:       i09ehh01agj0
 :END:
+- syntax highlight
+- push/pop parts  of the sentence onto a stack
+  - swap the items?
+- highlights for trains
+- '..' separator support
 
-* TODO write tests for tree builder behavior
-:PROPERTIES:
-:TS:       <2014-11-21 11:53PM>
-:ID:       4ps1ra70gog0
-:END:
-
-* TODO build a sequential machine / regex thing for j
+** TODO build a sequential machine / regex thing for j
 :PROPERTIES:
 :TS:       <2014-11-22 12:00AM>
 :ID:       cxvdgl70gog0
 :END:
-
-* TODO investigate JOD and see if it helps with the tech tree idea
+** TODO simplest stackwise concept
 :PROPERTIES:
-:TS:       <2014-12-04 10:07AM>
-:ID:       s7e51mq0wog0
+:TS:       <2022-05-10 07:14PM>
+:ID:       hln6cn01agj0
+:END:
+- have a simple jod-like dictionary in the background
+- find all unique J identifiers in the chunk
+- see which ones are undefined
+- allow 'stub' entries that name a part of speech
+
+** TODO 3-pane grammar/editor/ast thing
+:PROPERTIES:
+:TS:       <2022-05-10 07:27PM>
+:ID:       dioc6a11agj0
+:END:
+*** TODO demonstrate building a grammar interactively
+- import a text file
+- add regexes for tokenizer
+
+** TODO JOD browser
+:PROPERTIES:
+:TS:       <2022-05-10 07:29PM>
+:ID:       jsucic11agj0
+:END:
+list dictionaries
+show grid of names, with part of speech, documentation
+expand to see actual definition
+tiddly/glamorous-style hypertext
+
+** TODO get the pl0syntax unparser working
+:PROPERTIES:
+:TS:       <2022-05-10 07:30PM>
+:ID:       9u50te11agj0
+:END:
+
+** TODO leo-style outliner in j-kvm
+:PROPERTIES:
+:TS:       <2022-05-10 07:30PM>
+:ID:       96ii6f11agj0
+:END:
+
+** TODO simple widget layout language
+:PROPERTIES:
+:TS:       <2022-05-10 07:31PM>
+:ID:       a2i0ug11agj0
+:END:
+yaml?
+
+** TODO godot-style scene builder ui.
+:PROPERTIES:
+:TS:       <2022-05-10 07:32PM>
+:ID:       d605fi11agj0
+:END:
+
+** TODO 'extract function' browser
+:PROPERTIES:
+:TS:       <2022-05-10 07:37PM>
+:ID:       1up50q11agj0
+:END:
+
+** TODO true tree editor widget
+*** DONE add line editor to edit entries
+:PROPERTIES:
+:TS:       <2014-12-04 07:41AM>
+:ID:       63qe8vj0wog0
+:END:
+*** TODO make the editor part of the tree itself
+:PROPERTIES:
+:TS:       <2022-05-10 07:44PM>
+:ID:       xkieg121agj0
+:END:
+** TODO grid widget / multi-column treegrid thing
+:PROPERTIES:
+:TS:       <2022-05-10 07:44PM>
+:ID:       3xm2p121agj0
+:END:
+- to be used for the lexer
+- also base for editor with gutter
+** TODO true multi-line editor widget with selections
+:PROPERTIES:
+:TS:       <2022-05-10 07:45PM>
+:ID:       lit19321agj0
+:END:
+
+** TODO demonstrate autocompletion
+:PROPERTIES:
+:TS:       <2022-05-10 07:39PM>
+:ID:       xy59ms11agj0
+:END:
+
+** TODO traditional structure editor
+*** maybe model alice pascal?
+*** TODO unparse a tree
+:PROPERTIES:
+:TS:       <2014-11-20 11:56AM>
+:ID:       912c9k80eog0
+:END:
+** TODO simple outliner
+:PROPERTIES:
+:TS:       <2022-05-10 09:07PM>
+:ID:       rvw3yv51agj0
 :END:
 
 
-* -- old plan --
+* TODO proof editor
 ** DONE begin with a simple proof
 :PROPERTIES:
 :TS:       <2014-12-17 06:13AM>
@@ -129,7 +263,6 @@ This is mostly just for reference, because the atomic representation deals with 
 :TS:       <2014-12-17 06:30AM>
 :ID:       vvec9ln0dpg0
 :END:
-
 *** DONE derivation
 :PROPERTIES:
 :TS:       <2014-12-17 06:35AM>
@@ -272,3 +405,22 @@ This is mostly just for reference, because the atomic representation deals with 
 
 
 
+
+
+* -- to try ---
+** TODO write tests for tree builder behavior
+:PROPERTIES:
+:TS:       <2014-11-21 11:53PM>
+:ID:       4ps1ra70gog0
+:END:
+** NOTE . "views" (abstract interface for pattern matching)
+:PROPERTIES:
+:TS:       <2022-04-29 06:57PM>
+:ID:       c5jb8ia0wfj0
+:END:
+wadler 87  https://dl.acm.org/doi/pdf/10.1145/41625.41653
+(mentioned in ometa paper)
+
+"Wadler’s views [Wad87], for example, enable programmers to provide a “virtual representation” of their data that can be pattern-matched against without exposing any implementation details"
+** store the edited text buffer as a rope?
+https://en.wikipedia.org/wiki/Rope_%28data_structure%29
