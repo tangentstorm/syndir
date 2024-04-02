@@ -1,0 +1,4 @@
+syntax = production .
+production = identifier '=' expression '.' .
+expression = term {'|' term} .
+term = factor { factor }.

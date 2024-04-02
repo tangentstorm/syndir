@@ -1,0 +1,9 @@
+drawing model
+
+: syms =: {{(y)=:s:;:y}}
+: syms 'Text Line Nest'
+
+Doc =
+- Text Style Text         // a single token, (no newline)
+- Line                    // newline
+- Indent Int Doc          // indent the nested document
